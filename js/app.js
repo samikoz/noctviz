@@ -2,6 +2,7 @@ import * as THREE from "three";
 import vertex from "./shader/vertexParticles.glsl"
 import fragment from "./shader/fragment.glsl"
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import normals from "../sphere-normal.jpeg"
 
 export class Sketch {
   constructor(options) {
@@ -58,7 +59,6 @@ export class Sketch {
   }
 
   addObjects() {
-    let that = this;
     this.material = new THREE.ShaderMaterial({
       extensions: {
         derivatives: "#extension GL_OES_standard_derivatives : enable"
@@ -67,10 +67,13 @@ export class Sketch {
       uniforms: {
         time: { type: "f", value: 0 },
         resolution: { type: "v4", value: new THREE.Vector4() },
+        uNormals: { value: new THREE.TextureLoader().load(normals) },
         uvRate1: {
           value: new THREE.Vector2(1, 1)
         }
       },
+      transparent: true,
+      depthTest: false,
       vertexShader: vertex,
       fragmentShader: fragment
     });

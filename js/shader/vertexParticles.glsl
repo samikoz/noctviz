@@ -46,7 +46,7 @@ void main() {
   vec3 tangent = getTangent(progress);
   vec3 binormal = normalize(cross(normal, tangent));
 
-  float radius = 0.3 + aRandom.x * 0.1;
+  float radius = 0.3 + aRandom.z * 0.1;
   float circleX = radius*cos(aRandom.y * PI * 2. * time * 0.01 + aRandom.z * 7.);
   float circleY = radius*sin(aRandom.y * PI * 2. * time * 0.01 + aRandom.z * 7.);
 
