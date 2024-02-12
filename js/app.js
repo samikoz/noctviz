@@ -1,8 +1,14 @@
 import * as THREE from "three";
 import vertex from "./shader/vertexParticles.glsl"
-import fragment from "./shader/fragment.glsl"
+import vertexTube from "./shader/vertexTube.glsl"
+import fragment from "./shader/fragmentParticles.glsl"
+import fragmentTube from "./shader/fragmentTube.glsl"
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import normals from "../sphere-normal.jpeg"
+import normals from "../textures/sphere-normal.jpeg"
+import dots from "../textures/dots.png"
+import stripes from "../textures/stripes.png"
+
+const { sin, cos } = Math;
 
 export class Sketch {
   constructor(options) {
@@ -26,7 +32,7 @@ export class Sketch {
       1000
     );
 
-    this.camera.position.set(0, 0, 2);
+    this.camera.position.set(0, 0, 4);
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.time = 0;
 
@@ -59,6 +65,12 @@ export class Sketch {
   }
 
   addObjects() {
+    this.addParticles();
+
+    this.addCurrents();
+  }
+
+  addParticles() {
     this.material = new THREE.ShaderMaterial({
       extensions: {
         derivatives: "#extension GL_OES_standard_derivatives : enable"
@@ -101,8 +113,50 @@ export class Sketch {
     this.geometry.setAttribute("aRandom", new THREE.BufferAttribute(this.randoms, 3));
     this.geometry.setAttribute("size", new THREE.BufferAttribute(this.sizes, 1));
 
-    this.plane = new THREE.Points(this.geometry, this.material);
-    this.scene.add(this.plane);
+    this.particles = new THREE.Points(this.geometry, this.material);
+    this.scene.add(this.particles);
+  }
+
+  addCurrents() {
+    let points = [];
+
+    for (let i = 0; i <= 100; i++) {
+      let angle = 2*Math.PI*i/100;
+      let x = sin(angle) + 2. * sin(2. * angle);
+      let y = cos(angle) - 2. * cos(2. * angle);
+      let z = -sin(3. * angle);
+      points.push(new THREE.Vector3(x, y, z));
+
+    }
+    let curve = new THREE.CatmullRomCurve3(points);
+    this.tubeGeo = new THREE.TubeGeometry(curve, 100, 0.4, 100, true);
+
+    let dotsTexture = new THREE.TextureLoader().load(dots);
+    dotsTexture.wrapS = THREE.RepeatWrapping;
+    dotsTexture.wrapT = THREE.RepeatWrapping;
+    let stripesTexture = new THREE.TextureLoader().load(stripes);
+    stripesTexture.wrapS = THREE.RepeatWrapping;
+    stripesTexture.wrapT = THREE.RepeatWrapping;
+
+    this.tubeMaterial = new THREE.ShaderMaterial({
+      extensions: {
+        derivatives: "#extension GL_OES_standard_derivatives : enable"
+      },
+      side: THREE.FrontSide,
+      uniforms: {
+        time: { type: "f", value: 0 },
+        resolution: { type: "v4", value: new THREE.Vector4() },
+        uDots: { value: dotsTexture },
+        uStripes: { value: stripesTexture }
+      },
+      transparent: true,
+      depthTest: false,
+      vertexShader: vertexTube,
+      fragmentShader: fragmentTube
+    });
+
+    this.tube = new THREE.Mesh(this.tubeGeo, this.tubeMaterial);
+    this.scene.add(this.tube);
   }
 
   stop() {
@@ -120,6 +174,7 @@ export class Sketch {
     if (!this.isPlaying) return;
     this.time += 0.05;
     this.material.uniforms.time.value = this.time;
+    this.tubeMaterial.uniforms.time.value = this.time;
     requestAnimationFrame(this.render.bind(this));
     this.renderer.render(this.scene, this.camera);
   }

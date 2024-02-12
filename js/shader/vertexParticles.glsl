@@ -51,7 +51,6 @@ void main() {
   float circleY = radius*sin(aRandom.y * PI * 2. * time * 0.01 + aRandom.z * 7.);
 
   pos += (normal * circleX + binormal * circleY);
-  vUv = uv;
   vec4 mvPosition = modelViewMatrix * vec4( pos, 1. );
   gl_PointSize = 10. * ( 1. / - mvPosition.z );
   gl_Position = projectionMatrix * mvPosition;
