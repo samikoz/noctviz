@@ -1,8 +1,9 @@
 import * as THREE from "three";
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import fragmentMountain from "./shader/fragmentMountain.glsl"
-import vertexMountain from "./shader/vertexMountain.glsl"
+import fragmentMountain from "./shader/fragmentMountainTexture.glsl"
+import vertexMountain from "./shader/vertexMountainTexture.glsl"
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import stripes from "../textures/stripes.png"
 
 export class Sketch {
   constructor(options) {
@@ -29,9 +30,23 @@ export class Sketch {
 
     this.camera.position.set(0, 0, 4);
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    this.time = 0;
+    this.caster = new THREE.Raycaster();
 
     this.isPlaying = true;
+    this.uniforms = {
+      uTime: {
+        type: "f",
+        value: 0.0
+      },
+      uResolution: {
+        type: "v2",
+        value: new THREE.Vector2()
+      },
+      uMouseWorldPosition: {
+        type: "v3",
+        value: new THREE.Vector3()
+      }
+    };
 
     this.addObjects();
     this.resize();
@@ -46,6 +61,8 @@ export class Sketch {
   resize() {
     this.width = this.container.offsetWidth;
     this.height = this.container.offsetHeight;
+    this.uniforms.uResolution.value.x = this.width;
+    this.uniforms.uResolution.value.y = this.height;
     this.renderer.setSize(this.width, this.height);
     this.camera.aspect = this.width / this.height;
     this.camera.updateProjectionMatrix();
@@ -75,18 +92,19 @@ export class Sketch {
   }
 
   getShaderMaterial() {
+    let stripesTexture = new THREE.TextureLoader().load(stripes);
+    stripesTexture.wrapS = THREE.RepeatWrapping;
+    stripesTexture.wrapT = THREE.RepeatWrapping;
+
+    this.uniforms.uStripes = { value: stripesTexture };
     return new THREE.ShaderMaterial({
       extensions: {
         derivatives: "#extension GL_OES_standard_derivatives : enable"
       },
       side: THREE.DoubleSide,
-      uniforms: {
-        time: { type: "f", value: 0 },
-        resolution: { type: "v4", value: new THREE.Vector4() },
-        uvRate1: {
-          value: new THREE.Vector2(1, 1)
-        }
-      },
+      uniforms: this.uniforms,
+      transparent: true,
+      depthTest: false,
       fragmentShader: fragmentMountain,
       vertexShader: vertexMountain
     });
@@ -105,15 +123,24 @@ export class Sketch {
 
   render() {
     if (!this.isPlaying) return;
-    this.time += 0.05;
+    this.uniforms.uTime.value += 0.05;
 
-    this.material.uniforms.time.value = this.time;
 
     requestAnimationFrame(this.render.bind(this));
     this.renderer.render(this.scene, this.camera);
   }
 }
 
-new Sketch({
+let sketch = new Sketch({
   dom: document.getElementById("container")
 });
+
+document.onmousemove = function(e) {
+  let mousePositionX = (e.pageX / sketch.width) * 2 - 1;
+  let mousePositionY = -((e.pageY / sketch.height) * 2 - 1);
+
+  sketch.caster.setFromCamera(new THREE.Vector2(mousePositionX, mousePositionY), sketch.camera);
+  let intersects = sketch.caster.intersectObjects(sketch.scene.children);
+
+  sketch.uniforms.uMouseWorldPosition.value = intersects[0].point;
+}
