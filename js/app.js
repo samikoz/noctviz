@@ -3,6 +3,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { MeshLine, MeshLineMaterial } from 'three.meshline';
 
+import grad from '../textures/gradient.png'
 import vertexLine from './shader/vertexLine.glsl'
 import fragmentLine from './shader/fragmentLine.glsl'
 
@@ -17,7 +18,7 @@ export class Sketch {
     this.renderer = new THREE.WebGLRenderer();
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(this.width, this.height);
-    this.renderer.setClearColor(0x05233c, 1);
+    this.renderer.setClearColor(0x000000, 1);
     this.renderer.outputEncoding = THREE.sRGBEncoding;
 
     this.container.appendChild(this.renderer.domElement);
@@ -91,12 +92,17 @@ export class Sketch {
   }
 
   getMaterial() {
-    let material = new MeshLineMaterial({ color: new THREE.Color(0xffffff), lineWidth: 0.002});
+    let gradTexture = new THREE.TextureLoader().load(grad);
+    gradTexture.wrapS = THREE.RepeatWrapping;
+    gradTexture.wrapT = THREE.RepeatWrapping;
+    let material = new MeshLineMaterial({ color: new THREE.Color(0xffffff), lineWidth: 0.002, useMap: true, map: gradTexture});
     material.vertexShader = vertexLine;
     material.fragmentShader = fragmentLine;
     material.transparent = true;
     let newUniforms = {};
     Object.assign(newUniforms, material.uniforms, this.uniforms);
+
+
     material.uniforms = newUniforms;
     return material;
   }

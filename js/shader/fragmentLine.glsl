@@ -25,18 +25,24 @@ uniform float visibility;
 uniform float alphaTest;
 uniform vec2 repeat;
 uniform vec3 uMouseWorldPosition;
+uniform float uTime;
 
-varying vec2 vUV;
+varying vec2 vUv;
 varying vec4 vColor;
 varying float vCounters;
+varying vec3 vPosition;
+
 void main() {
     #if defined(USE_LOGDEPTHBUF) && defined(USE_LOGDEPTHBUF_EXT)
         gl_FragDepthEXT = vIsPerspective == 0.0 ? gl_FragCoord.z : log2(vFragDepth) * logDepthBufFC * 0.5;
     #endif
 
     vec4 c = vColor;
-    if (useMap == 1.) c *= texture2D(map, vUV * repeat);
-    if (useAlphaMap == 1.) c.a *= texture2D(alphaMap, vUV * repeat).a;
+
+    float randomisedVPos = sin(vPosition.x*100000.);
+
+    if (useMap == 1.) c *= texture2D(map, vUv * repeat + vec2(randomisedVPos + uTime * 0.5));
+    if (useAlphaMap == 1.) c.a *= texture2D(alphaMap, vUv * repeat + vec2(randomisedVPos + uTime * 0.5)).a;
     if (c.a < alphaTest) discard;
     if (useDash == 1.) {
         c.a *= ceil(mod(vCounters + dashOffset, dashArray) - (dashArray * dashRatio));

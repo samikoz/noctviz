@@ -23,9 +23,10 @@ uniform float opacity;
 uniform float sizeAttenuation;
 uniform vec3 uMouseWorldPosition;
 
-varying vec2 vUV;
+varying vec2 vUv;
 varying vec4 vColor;
 varying float vCounters;
+varying vec3 vPosition;
 
 vec2 fix( vec4 i, float aspect ) {
     vec2 res = i.xy / i.w;
@@ -36,7 +37,7 @@ vec2 fix( vec4 i, float aspect ) {
 }
 
 vec4 computeOffset(vec4 worldPosition) {
-    vec3 mousePosition = 2.*uMouseWorldPosition; //the factor is due to raycasting against the scene with the model but rendering a scene with a different camera
+    vec3 mousePosition = 2.*uMouseWorldPosition; //the factor is due to raycasting against the scene from the loaded model but rendering different one
     return vec4(
         normalize(-worldPosition.xyz + mousePosition)*(min(length(worldPosition.xyz - mousePosition), 0.2) - 0.2)*vec3(1., sign(worldPosition.y - mousePosition.y), 1.),
         worldPosition.w);
@@ -46,7 +47,7 @@ void main() {
     float aspect = resolution.x / resolution.y;
 
     vColor = vec4( color, opacity );
-    vUV = uv;
+    vUv = uv;
 
     //mat4 m = projectionMatrix * modelViewMatrix;
     //vec4 finalPosition = m * vec4( position, 1.0 );
@@ -60,6 +61,8 @@ void main() {
     worldPosition += computeOffset(worldPosition);
     prevWorldPosition += computeOffset(prevWorldPosition);
     nextWorldPosition += computeOffset(nextWorldPosition);
+
+    vPosition = worldPosition.xyz;
 
     mat4 m = projectionMatrix * viewMatrix;
     vec4 finalPosition = m * worldPosition;
