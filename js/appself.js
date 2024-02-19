@@ -16,6 +16,10 @@ export default class Sketch {
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(this.width, this.height);
     this.renderer.setClearColor(0x000000, 1);
+
+    this.raycaster = new THREE.Raycaster();
+    this.pointer = new THREE.Vector2();
+
     this.renderer.outputEncoding = THREE.sRGBEncoding;
 
     this.container.appendChild(this.renderer.domElement);
@@ -27,17 +31,37 @@ export default class Sketch {
       1000
     );
 
-    this.camera.position.set(0, 0, 2);
+    this.camera.position.set(0, 0, 4);
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.time = 0;
 
     this.isPlaying = true;
-
+    this.setupEvents();
     this.setupFBO();
     this.addObjects();
     this.resize();
     this.render();
     this.setupResize();
+  }
+
+  setupEvents(){
+    let geometry = new THREE.PlaneGeometry(100,100);
+    geometry.translate(0, 0, 1);
+    this.dummy = new THREE.Mesh(
+        geometry,
+        new THREE.MeshBasicMaterial()
+    )
+    document.addEventListener('pointermove', (e)=>{
+      this.pointer.x = ( e.clientX / window.innerWidth ) * 2 - 1;
+      this.pointer.y = - ( e.clientY / window.innerHeight ) * 2 + 1;
+
+      this.raycaster.setFromCamera( this.pointer, this.camera );
+      let intersects = this.raycaster.intersectObject( this.dummy );
+      if (intersects.length > 0) {
+        let {x,y} = intersects[0].point;
+        this.fboMaterial.uniforms.uMouse.value = new THREE.Vector2(x,y);
+      }
+    })
   }
 
   setupResize() {
@@ -54,7 +78,7 @@ export default class Sketch {
   }
 
   setupFBO() {
-    this.size = 128;
+    this.size = 256;
     this.fbo = this.getRenderTarget();
     this.fbo1 = this.getRenderTarget();
 
@@ -86,6 +110,7 @@ export default class Sketch {
     this.fboMaterial = new THREE.ShaderMaterial({
       uniforms: {
         uPositions: {value: this.fboTexture},
+        uMouse: {value: new THREE.Vector2(0,0)},
         uInfo: {value: null},
         time: {value: 0},
       },
@@ -143,6 +168,7 @@ export default class Sketch {
           value: new THREE.Vector2(1, 1)
         }
       },
+      transparent: true,
       vertexShader: vertexParticles,
       fragmentShader: fragment
     });
