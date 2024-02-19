@@ -3,6 +3,9 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { MeshLine, MeshLineMaterial } from 'three.meshline';
 
+import vertexLine from './shader/vertexLine.glsl'
+import fragmentLine from './shader/fragmentLine.glsl'
+
 export class Sketch {
   constructor(options) {
     this.scene = new THREE.Scene();
@@ -45,6 +48,7 @@ export class Sketch {
         value: new THREE.Vector3()
       }
     };
+    this.material = this.getMaterial();
 
     this.resize();
     this.addObjects();
@@ -83,9 +87,18 @@ export class Sketch {
     const geometry = new THREE.BufferGeometry().setFromPoints(linePoints);
     const line = new MeshLine();
     line.setGeometry(geometry);
+    return new THREE.Mesh(line, this.material);
+  }
+
+  getMaterial() {
     let material = new MeshLineMaterial({ color: new THREE.Color(0xffffff), lineWidth: 0.002});
+    material.vertexShader = vertexLine;
+    material.fragmentShader = fragmentLine;
     material.transparent = true;
-    return new THREE.Mesh(line, material);
+    let newUniforms = {};
+    Object.assign(newUniforms, material.uniforms, this.uniforms);
+    material.uniforms = newUniforms;
+    return material;
   }
 
   setupResize() {
@@ -107,8 +120,7 @@ export class Sketch {
     this.gltfLoader.load(
         '../textures/scene.gltf',
         function ( gltf ) {
-          let loadedScene = gltf.scene;
-          sketch.model = loadedScene;
+          sketch.model = gltf.scene;
           sketch.model.updateMatrixWorld();
           sketch.populateIsolines();
         },
@@ -150,6 +162,6 @@ document.onmousemove = function(e) {
   let mousePositionY = -((e.pageY / sketch.height) * 2 - 1);
 
   sketch.caster.setFromCamera(new THREE.Vector2(mousePositionX, mousePositionY), sketch.camera);
-  let intersects = sketch.caster.intersectObjects(sketch.scene.children);
+  let intersects = sketch.caster.intersectObjects(sketch.model.children);
   sketch.uniforms.uMouseWorldPosition.value = intersects[0].point;
 }
