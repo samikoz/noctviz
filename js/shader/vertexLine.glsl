@@ -22,6 +22,7 @@ uniform vec3 color;
 uniform float opacity;
 uniform float sizeAttenuation;
 uniform vec3 uMouseWorldPosition;
+uniform sampler2D uMountains;
 
 varying vec2 vUv;
 varying vec4 vColor;
@@ -57,6 +58,9 @@ void main() {
     vec4 worldPosition = (modelMatrix * vec4(position, 1.0));
     vec4 prevWorldPosition = (modelMatrix * vec4(previous, 1.0));
     vec4 nextWorldPosition = (modelMatrix * vec4(next, 1.0));
+
+    vec4 sampledMountainColor = texture2D(uMountains, vec2(0.5 + worldPosition.x, 0.5 + worldPosition.z));
+    worldPosition.y = 0.5 * sampledMountainColor.x;
 
     worldPosition += computeOffset(worldPosition);
     prevWorldPosition += computeOffset(prevWorldPosition);
