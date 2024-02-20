@@ -2,9 +2,9 @@ import * as THREE from "three";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { MeshLine, MeshLineMaterial } from 'three.meshline';
 
-import mountains from '../textures/mountains.png'
 import vertexLine from './shader/vertexLine.glsl'
-import fragmentLine from './shader/fragmentLine.glsl'
+import noiseVertex from "./shader/noiseVertex.glsl";
+import noiseFragment from "./shader/noiseFragment.glsl";
 
 export class Sketch {
   constructor(options) {
@@ -32,7 +32,6 @@ export class Sketch {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
     this.isPlaying = true;
-    let mountainTexture = new THREE.TextureLoader().load(mountains);
     this.uniforms = {
       uTime: {
         type: "f",
@@ -46,16 +45,52 @@ export class Sketch {
         type: "v3",
         value: new THREE.Vector3()
       },
-      uMountains: {
-        value: mountainTexture
-      }
+      uNoise: {value: null},
     };
     this.material = this.getMaterial();
 
     this.resize();
+    this.setupFBO();
     this.addLines();
     this.render();
     this.setupResize();
+  }
+
+  getRenderTarget() {
+    return new THREE.WebGLRenderTarget(this.width, this.height, {
+      minFilter: THREE.NearestFilter,
+      magFilter: THREE.NearestFilter,
+      format: THREE.RGBAFormat,
+      type: THREE.FloatType
+    });
+  }
+
+  setupFBO() {
+    this.size = 256;
+    this.fbo = this.getRenderTarget();
+    this.fbo1 = this.getRenderTarget();
+
+    this.fboScene = new THREE.Scene();
+    this.fboCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, -1, 1);
+    this.fboCamera.position.set(0, 0, 1);
+    this.fboCamera.lookAt(0, 0, 0);
+    let geometry = new THREE.PlaneGeometry(2, 2);
+
+    this.fboMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        uTime: {value: 0},
+      },
+      vertexShader: noiseVertex,
+      fragmentShader: noiseFragment,
+    });
+
+    this.fboMesh = new THREE.Mesh(geometry, this.fboMaterial);
+    this.fboScene.add(this.fboMesh);
+
+    //this.renderer.setRenderTarget(this.fbo);
+    //this.renderer.render(this.fboScene, this.fboCamera);
+    //this.renderer.setRenderTarget(this.fbo1);
+    //this.renderer.render(this.fboScene, this.fboCamera);
   }
 
   addLines() {
@@ -87,7 +122,6 @@ export class Sketch {
   getMaterial() {
     let material = new MeshLineMaterial({ color: new THREE.Color(0xffffff), lineWidth: 0.002});
     material.vertexShader = vertexLine;
-    material.fragmentShader = fragmentLine;
     material.transparent = true;
     let newUniforms = {};
     Object.assign(newUniforms, material.uniforms, this.uniforms);
@@ -124,9 +158,15 @@ export class Sketch {
 
   render() {
     if (!this.isPlaying) return;
-    //this.uniforms.uTime.value += 0.05;
+    this.uniforms.uTime.value += 0.05;
+    this.fboMaterial.uniforms.uTime.value += 0.05;
 
     requestAnimationFrame(this.render.bind(this));
+    this.renderer.setRenderTarget(this.fbo);
+    this.renderer.render(this.fboScene, this.fboCamera);
+
+    this.material.uniforms.uNoise.value = this.fbo.texture;
+    this.renderer.setRenderTarget(null);
     this.renderer.render(this.scene, this.camera);
   }
 }

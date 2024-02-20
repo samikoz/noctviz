@@ -22,9 +22,9 @@ uniform vec3 color;
 uniform float opacity;
 uniform float sizeAttenuation;
 uniform vec3 uMouseWorldPosition;
-uniform sampler2D uMountains;
+uniform sampler2D uNoise;
 
-varying vec2 vUv;
+varying vec2 vUV;
 varying vec4 vColor;
 varying float vCounters;
 varying vec3 vPosition;
@@ -48,7 +48,7 @@ void main() {
     float aspect = resolution.x / resolution.y;
 
     vColor = vec4( color, opacity );
-    vUv = uv;
+    vUV = uv;
 
     //mat4 m = projectionMatrix * modelViewMatrix;
     //vec4 finalPosition = m * vec4( position, 1.0 );
@@ -59,12 +59,12 @@ void main() {
     vec4 prevWorldPosition = (modelMatrix * vec4(previous, 1.0));
     vec4 nextWorldPosition = (modelMatrix * vec4(next, 1.0));
 
-    vec4 sampledMountainColor = texture2D(uMountains, vec2(0.5 + worldPosition.x, 0.5 + worldPosition.z));
+    vec4 sampledMountainColor = texture2D(uNoise, vec2(0.5) + 0.5*worldPosition.xz);
     worldPosition.y = 0.5 * sampledMountainColor.x;
 
-    worldPosition += computeOffset(worldPosition);
-    prevWorldPosition += computeOffset(prevWorldPosition);
-    nextWorldPosition += computeOffset(nextWorldPosition);
+    //worldPosition += computeOffset(worldPosition);
+    //prevWorldPosition += computeOffset(prevWorldPosition);
+    //nextWorldPosition += computeOffset(nextWorldPosition);
 
     vPosition = worldPosition.xyz;
 
