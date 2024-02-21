@@ -1,14 +1,16 @@
 import * as THREE from "three";
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { MeshLine, MeshLineMaterial } from 'three.meshline';
 
+import grad from './textures/gradient.png'
 import vertexLine from './shader/vertexLine.glsl'
-import noiseVertex from "./shader/noiseVertex.glsl";
-import noiseFragment from "./shader/noiseFragment.glsl";
+import fragmentLine from './shader/fragmentLine.glsl'
 
 export class Sketch {
   constructor(options) {
     this.scene = new THREE.Scene();
+    this.gltfLoader = new GLTFLoader();
 
     this.container = options.dom;
     this.width = this.container.offsetWidth;
@@ -30,6 +32,7 @@ export class Sketch {
 
     this.camera.position.set(0, 0, 4);
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.caster = new THREE.Raycaster();
 
     this.isPlaying = true;
     this.uniforms = {
@@ -44,73 +47,42 @@ export class Sketch {
       uMouseWorldPosition: {
         type: "v3",
         value: new THREE.Vector3()
-      },
-      uNoise: {value: null},
+      }
     };
     this.material = this.getMaterial();
 
     this.resize();
-    this.setupFBO();
-    this.addLines();
+    this.addObjects();
     this.render();
     this.setupResize();
   }
 
-  getRenderTarget() {
-    return new THREE.WebGLRenderTarget(this.width, this.height, {
-      minFilter: THREE.NearestFilter,
-      magFilter: THREE.NearestFilter,
-      format: THREE.RGBAFormat,
-      type: THREE.FloatType
-    });
-  }
-
-  setupFBO() {
-    this.size = 256;
-    this.fbo = this.getRenderTarget();
-    this.fbo1 = this.getRenderTarget();
-
-    this.fboScene = new THREE.Scene();
-    this.fboCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, -1, 1);
-    this.fboCamera.position.set(0, 0, 1);
-    this.fboCamera.lookAt(0, 0, 0);
-    let geometry = new THREE.PlaneGeometry(2, 2);
-
-    this.fboMaterial = new THREE.ShaderMaterial({
-      uniforms: {
-        uTime: {value: 0},
-      },
-      vertexShader: noiseVertex,
-      fragmentShader: noiseFragment,
-    });
-
-    this.fboMesh = new THREE.Mesh(geometry, this.fboMaterial);
-    this.fboScene.add(this.fboMesh);
-
-    //this.renderer.setRenderTarget(this.fbo);
-    //this.renderer.render(this.fboScene, this.fboCamera);
-    //this.renderer.setRenderTarget(this.fbo1);
-    //this.renderer.render(this.fboScene, this.fboCamera);
-  }
-
-  addLines() {
+  populateIsolines() {
     this.scene.updateMatrixWorld();
     let lineCount = 20;
     const modelXInterval = [-1, 1];
     for (let i = 1; i < lineCount; i++) {
       let tubeXPosition = modelXInterval[0] + i/lineCount*(modelXInterval[1]-modelXInterval[0]);
-      this.scene.add(this.getLineAt(tubeXPosition));
+      this.scene.add(this.getIsolineAt(tubeXPosition));
     }
   }
 
-  getLineAt(x) {
+  getIsolineAt(x) {
+    let probingYHeight = 10;
     let probingCount = 100;
+    let probingDirection = new THREE.Vector3(0, -1, 0);
     const modelZInterval = [ -1, 1 ];
 
     let linePoints = [];
     for (let i = 0; i < probingCount; i++) {
       let zPosition = modelZInterval[0] + i/probingCount*(modelZInterval[1]-modelZInterval[0]);
-      linePoints.push(new THREE.Vector3(x, 0, zPosition));
+      let casterOrigin = new THREE.Vector3(x, probingYHeight, zPosition);
+      let caster = new THREE.Raycaster(casterOrigin, probingDirection);
+      let intersects = caster.intersectObjects(this.model.children);
+      if (intersects.length > 0) {
+        let intersection = intersects[0].point;
+        linePoints.push(new THREE.Vector3(intersection.x, intersection.y, intersection.z));
+      }
     }
 
     const geometry = new THREE.BufferGeometry().setFromPoints(linePoints);
@@ -120,8 +92,12 @@ export class Sketch {
   }
 
   getMaterial() {
-    let material = new MeshLineMaterial({ color: new THREE.Color(0xffffff), lineWidth: 0.002});
+    let gradTexture = new THREE.TextureLoader().load(grad);
+    gradTexture.wrapS = THREE.RepeatWrapping;
+    gradTexture.wrapT = THREE.RepeatWrapping;
+    let material = new MeshLineMaterial({ color: new THREE.Color(0xffffff), lineWidth: 0.002, useMap: true, map: gradTexture});
     material.vertexShader = vertexLine;
+    material.fragmentShader = fragmentLine;
     material.transparent = true;
     let newUniforms = {};
     Object.assign(newUniforms, material.uniforms, this.uniforms);
@@ -145,6 +121,24 @@ export class Sketch {
     this.camera.updateProjectionMatrix();
   }
 
+  addObjects() {
+    const sketch = this;
+    this.gltfLoader.load(
+        './modelflow/textures/scene.gltf',
+        function ( gltf ) {
+          sketch.model = gltf.scene;
+          sketch.model.updateMatrixWorld();
+          sketch.populateIsolines();
+        },
+        function ( xhr ) {
+          console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+        },
+        function ( error ) {
+          console.log( 'An error happened:', error );
+        }
+    );
+  }
+
   stop() {
     this.isPlaying = false;
   }
@@ -159,14 +153,8 @@ export class Sketch {
   render() {
     if (!this.isPlaying) return;
     this.uniforms.uTime.value += 0.05;
-    this.fboMaterial.uniforms.uTime.value += 0.05;
 
     requestAnimationFrame(this.render.bind(this));
-    this.renderer.setRenderTarget(this.fbo);
-    this.renderer.render(this.fboScene, this.fboCamera);
-
-    this.material.uniforms.uNoise.value = this.fbo.texture;
-    this.renderer.setRenderTarget(null);
     this.renderer.render(this.scene, this.camera);
   }
 }
@@ -175,7 +163,6 @@ let sketch = new Sketch({
   dom: document.getElementById("container")
 });
 
-/*
 document.onmousemove = function(e) {
   let mousePositionX = (e.pageX / sketch.width) * 2 - 1;
   let mousePositionY = -((e.pageY / sketch.height) * 2 - 1);
@@ -184,4 +171,3 @@ document.onmousemove = function(e) {
   let intersects = sketch.caster.intersectObjects(sketch.model.children);
   sketch.uniforms.uMouseWorldPosition.value = intersects[0].point;
 }
-*/
