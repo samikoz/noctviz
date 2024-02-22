@@ -1,6 +1,6 @@
 import * as THREE from "three";
+import { MeshLineGeometry, MeshLineMaterial } from 'meshline'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import { MeshLine, MeshLineMaterial } from 'three.meshline';
 
 import vertexLine from './shader/vertexLine.glsl'
 import noiseVertex from "./shader/noiseVertex.glsl";
@@ -108,10 +108,10 @@ export class Sketch {
       linePoints.push(new THREE.Vector3(x, 0, zPosition));
     }
 
-    const geometry = new THREE.BufferGeometry().setFromPoints(linePoints);
-    const line = new MeshLine();
-    line.setGeometry(geometry);
-    return new THREE.Mesh(line, this.lineMaterial);
+    const geometry = new MeshLineGeometry()
+    geometry.setPoints(linePoints)
+    const material = this.lineMaterial
+    return new THREE.Mesh(geometry, material)
   }
 
   getMaterial() {

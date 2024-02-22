@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { MeshLine, MeshLineMaterial } from 'three.meshline';
+import { MeshLineGeometry, MeshLineMaterial } from 'meshline'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 
@@ -90,10 +90,10 @@ export class Sketch {
       }
     }
 
-    const geometry = new THREE.BufferGeometry().setFromPoints(linePoints);
-    const line = new MeshLine();
-    line.setGeometry(geometry);
-    return new THREE.Mesh(line, this.lineMaterial);
+    const geometry = new MeshLineGeometry()
+    geometry.setPoints(linePoints)
+    const material = this.lineMaterial
+    return new THREE.Mesh(geometry, material)
   }
 
   getLineMaterial() {
