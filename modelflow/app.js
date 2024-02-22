@@ -1,13 +1,16 @@
-import * as THREE from "three";
+import * as THREE from 'three';
+import { MeshLine, MeshLineMaterial } from 'three.meshline';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import { MeshLine, MeshLineMaterial } from 'three.meshline';
 
 import grad from './textures/gradient.png'
 import vertexLine from './shader/vertexLine.glsl'
-import fragmentLine from './shader/fragmentLine.glsl'
 
 export class Sketch {
+  modelFilePath = './modelflow/textures/scene.gltf';
+  modelXRange = [-1, 1];
+  modelZRange = [-1, 1];
+
   constructor(options) {
     this.scene = new THREE.Scene();
     this.gltfLoader = new GLTFLoader();
@@ -19,7 +22,7 @@ export class Sketch {
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(this.width, this.height);
     this.renderer.setClearColor(0x000000, 1);
-    this.renderer.outputEncoding = THREE.sRGBEncoding;
+    this.renderer.outputColorSpace = THREE.SRGBColorSpace
 
     this.container.appendChild(this.renderer.domElement);
 
@@ -44,12 +47,16 @@ export class Sketch {
         type: "v2",
         value: new THREE.Vector2()
       },
-      uMouseWorldPosition: {
+      uMousePosition: {
         type: "v3",
         value: new THREE.Vector3()
+      },
+      uDistortionSize: {
+        type: "f",
+        value: 0.1,
       }
     };
-    this.material = this.getMaterial();
+    this.lineMaterial = this.getLineMaterial();
 
     this.resize();
     this.addObjects();
@@ -60,9 +67,8 @@ export class Sketch {
   populateIsolines() {
     this.scene.updateMatrixWorld();
     let lineCount = 20;
-    const modelXInterval = [-1, 1];
     for (let i = 1; i < lineCount; i++) {
-      let tubeXPosition = modelXInterval[0] + i/lineCount*(modelXInterval[1]-modelXInterval[0]);
+      let tubeXPosition = this.modelXRange[0] + i/lineCount*(this.modelXRange[1]-this.modelXRange[0]);
       this.scene.add(this.getIsolineAt(tubeXPosition));
     }
   }
@@ -71,14 +77,13 @@ export class Sketch {
     let probingYHeight = 10;
     let probingCount = 100;
     let probingDirection = new THREE.Vector3(0, -1, 0);
-    const modelZInterval = [ -1, 1 ];
 
     let linePoints = [];
     for (let i = 0; i < probingCount; i++) {
-      let zPosition = modelZInterval[0] + i/probingCount*(modelZInterval[1]-modelZInterval[0]);
+      let zPosition = this.modelZRange[0] + i/probingCount*(this.modelZRange[1]-this.modelZRange[0]);
       let casterOrigin = new THREE.Vector3(x, probingYHeight, zPosition);
-      let caster = new THREE.Raycaster(casterOrigin, probingDirection);
-      let intersects = caster.intersectObjects(this.model.children);
+      this.caster.set(casterOrigin, probingDirection);
+      let intersects = this.caster.intersectObjects(this.loadedModel.children);
       if (intersects.length > 0) {
         let intersection = intersects[0].point;
         linePoints.push(new THREE.Vector3(intersection.x, intersection.y, intersection.z));
@@ -88,16 +93,12 @@ export class Sketch {
     const geometry = new THREE.BufferGeometry().setFromPoints(linePoints);
     const line = new MeshLine();
     line.setGeometry(geometry);
-    return new THREE.Mesh(line, this.material);
+    return new THREE.Mesh(line, this.lineMaterial);
   }
 
-  getMaterial() {
-    let gradTexture = new THREE.TextureLoader().load(grad);
-    gradTexture.wrapS = THREE.RepeatWrapping;
-    gradTexture.wrapT = THREE.RepeatWrapping;
-    let material = new MeshLineMaterial({ color: new THREE.Color(0xffffff), lineWidth: 0.002, useMap: true, map: gradTexture});
+  getLineMaterial() {
+    let material = new MeshLineMaterial({ color: new THREE.Color(0xffffff), lineWidth: 0.002});
     material.vertexShader = vertexLine;
-    material.fragmentShader = fragmentLine;
     material.transparent = true;
     let newUniforms = {};
     Object.assign(newUniforms, material.uniforms, this.uniforms);
@@ -123,11 +124,12 @@ export class Sketch {
 
   addObjects() {
     const sketch = this;
-    this.gltfLoader.load(
-        './modelflow/textures/scene.gltf',
+    sketch.gltfLoader.load(
+        sketch.modelFilePath,
         function ( gltf ) {
-          sketch.model = gltf.scene;
-          sketch.model.updateMatrixWorld();
+          let loadedScene = gltf.scene;
+          loadedScene.updateMatrixWorld();
+          sketch.loadedModel = loadedScene;
           sketch.populateIsolines();
         },
         function ( xhr ) {
@@ -168,6 +170,11 @@ document.onmousemove = function(e) {
   let mousePositionY = -((e.pageY / sketch.height) * 2 - 1);
 
   sketch.caster.setFromCamera(new THREE.Vector2(mousePositionX, mousePositionY), sketch.camera);
-  let intersects = sketch.caster.intersectObjects(sketch.model.children);
-  sketch.uniforms.uMouseWorldPosition.value = intersects[0].point;
+  let intersects = sketch.caster.intersectObjects(sketch.loadedModel.children);
+  if (intersects.length > 0) {
+    sketch.uniforms.uMousePosition.value = intersects[0].point;
+  }
+  else {
+    sketch.uniforms.uMousePosition.value = new THREE.Vector3(10^10, 10^10, 10^10);
+  }
 }

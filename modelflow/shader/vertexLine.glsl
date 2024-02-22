@@ -21,12 +21,12 @@ uniform float lineWidth;
 uniform vec3 color;
 uniform float opacity;
 uniform float sizeAttenuation;
-uniform vec3 uMouseWorldPosition;
+uniform vec3 uMousePosition;
+uniform float uDistortionSize;
 
-varying vec2 vUv;
+varying vec2 vUV;
 varying vec4 vColor;
 varying float vCounters;
-varying vec3 vPosition;
 
 vec2 fix( vec4 i, float aspect ) {
     vec2 res = i.xy / i.w;
@@ -36,38 +36,24 @@ vec2 fix( vec4 i, float aspect ) {
 
 }
 
-vec4 computeOffset(vec4 worldPosition) {
-    vec3 mousePosition = 2.*uMouseWorldPosition; //the factor is due to raycasting against the scene from the loaded model but rendering different one
-    return vec4(
-        normalize(-worldPosition.xyz + mousePosition)*(min(length(worldPosition.xyz - mousePosition), 0.2) - 0.2)*vec3(1., sign(worldPosition.y - mousePosition.y), 1.),
-        worldPosition.w);
+vec3 computeOffset(vec3 worldPosition) {
+    return normalize(-worldPosition.xyz + uMousePosition)*(min(length(worldPosition.xyz - uMousePosition), uDistortionSize) - uDistortionSize);
 }
 
 void main() {
     float aspect = resolution.x / resolution.y;
 
     vColor = vec4( color, opacity );
-    vUv = uv;
+    vUV = uv;
 
-    //mat4 m = projectionMatrix * modelViewMatrix;
-    //vec4 finalPosition = m * vec4( position, 1.0 );
-    //vec4 prevPos = m * vec4( previous, 1.0 );
-    //vec4 nextPos = m * vec4( next, 1.0 );
+    vec3 offsetPosition = position + computeOffset(position);
+    vec3 offsetPrevious = previous + computeOffset(previous);
+    vec3 offsetNext = next + computeOffset(next);
 
-    vec4 worldPosition = (modelMatrix * vec4(position, 1.0));
-    vec4 prevWorldPosition = (modelMatrix * vec4(previous, 1.0));
-    vec4 nextWorldPosition = (modelMatrix * vec4(next, 1.0));
-
-    worldPosition += computeOffset(worldPosition);
-    prevWorldPosition += computeOffset(prevWorldPosition);
-    nextWorldPosition += computeOffset(nextWorldPosition);
-
-    vPosition = worldPosition.xyz;
-
-    mat4 m = projectionMatrix * viewMatrix;
-    vec4 finalPosition = m * worldPosition;
-    vec4 prevPos = m * prevWorldPosition;
-    vec4 nextPos = m * nextWorldPosition;
+    mat4 m = projectionMatrix * modelViewMatrix;
+    vec4 finalPosition = m * vec4(offsetPosition, 1.0 );
+    vec4 prevPos = m * vec4(offsetPrevious, 1.0 );
+    vec4 nextPos = m * vec4(offsetNext, 1.0 );
 
     vec2 currentP = fix( finalPosition, aspect );
     vec2 prevP = fix( prevPos, aspect );

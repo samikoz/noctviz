@@ -111,7 +111,7 @@ export class Sketch {
     const geometry = new THREE.BufferGeometry().setFromPoints(linePoints);
     const line = new MeshLine();
     line.setGeometry(geometry);
-    return new THREE.Mesh(line, this.material);
+    return new THREE.Mesh(line, this.lineMaterial);
   }
 
   getMaterial() {
@@ -160,7 +160,7 @@ export class Sketch {
     this.renderer.setRenderTarget(this.fbo);
     this.renderer.render(this.fboScene, this.fboCamera);
 
-    this.material.uniforms.uNoise.value = this.fbo.texture;
+    this.lineMaterial.uniforms.uNoise.value = this.fbo.texture;
     this.renderer.setRenderTarget(null);
     this.renderer.render(this.scene, this.camera);
   }
