@@ -24,10 +24,10 @@ uniform float dashRatio;
 uniform float visibility;
 uniform float alphaTest;
 uniform vec2 repeat;
-uniform vec3 uMouseWorldPosition;
 uniform float uTime;
+uniform sampler2D uTexture;
 
-varying vec2 vUv;
+varying vec2 vUV;
 varying vec4 vColor;
 varying float vCounters;
 varying vec3 vPosition;
@@ -39,10 +39,8 @@ void main() {
 
     vec4 c = vColor;
 
-    float randomisedVPos = sin(vPosition.x*100000.);
-
-    if (useMap == 1.) c *= texture2D(map, vUv * repeat + vec2(randomisedVPos + uTime * 0.5));
-    if (useAlphaMap == 1.) c.a *= texture2D(alphaMap, vUv * repeat + vec2(randomisedVPos + uTime * 0.5)).a;
+    if (useMap == 1.) c *= texture2D(map, vUV * repeat);
+    if (useAlphaMap == 1.) c.a *= texture2D(alphaMap, vUV * repeat).a;
     if (c.a < alphaTest) discard;
     if (useDash == 1.) {
         c.a *= ceil(mod(vCounters + dashOffset, dashArray) - (dashArray * dashRatio));

@@ -68,14 +68,13 @@ export class Sketch {
   setupFBO() {
     this.size = 256;
     this.fbo = this.getRenderTarget();
-    this.fbo1 = this.getRenderTarget();
 
     this.fboScene = new THREE.Scene();
     this.fboCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, -1, 1);
     this.fboCamera.position.set(0, 0, 1);
     this.fboCamera.lookAt(0, 0, 0);
-    let geometry = new THREE.PlaneGeometry(2, 2);
 
+    let geometry = new THREE.PlaneGeometry(2, 2);
     this.fboMaterial = new THREE.ShaderMaterial({
       uniforms: {
         uTime: {value: 0},
@@ -86,6 +85,13 @@ export class Sketch {
 
     this.fboMesh = new THREE.Mesh(geometry, this.fboMaterial);
     this.fboScene.add(this.fboMesh);
+  }
+
+  renderTexture() {
+    this.renderer.setRenderTarget(this.fbo);
+    this.renderer.render(this.fboScene, this.fboCamera);
+
+    return this.fbo.texture;
   }
 
   addLines() {
@@ -157,10 +163,8 @@ export class Sketch {
     this.fboMaterial.uniforms.uTime.value += 0.05;
 
     requestAnimationFrame(this.render.bind(this));
-    this.renderer.setRenderTarget(this.fbo);
-    this.renderer.render(this.fboScene, this.fboCamera);
 
-    this.lineMaterial.uniforms.uNoise.value = this.fbo.texture;
+    this.lineMaterial.uniforms.uNoise.value = this.renderTexture()
     this.renderer.setRenderTarget(null);
     this.renderer.render(this.scene, this.camera);
   }

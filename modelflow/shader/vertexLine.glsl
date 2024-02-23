@@ -23,10 +23,13 @@ uniform float opacity;
 uniform float sizeAttenuation;
 uniform vec3 uMousePosition;
 uniform float uDistortionSize;
+uniform sampler2D uTexture;
 
 varying vec2 vUV;
 varying vec4 vColor;
 varying float vCounters;
+
+float PI = 3.141592653589793238;
 
 vec2 fix( vec4 i, float aspect ) {
     vec2 res = i.xy / i.w;
@@ -34,6 +37,10 @@ vec2 fix( vec4 i, float aspect ) {
     vCounters = counters;
     return res;
 
+}
+
+float decodeHeight(float encodedColor) {
+    return tan(PI*(encodedColor - 0.5));
 }
 
 vec3 computeOffset(vec3 worldPosition) {
@@ -46,9 +53,16 @@ void main() {
     vColor = vec4( color, opacity );
     vUV = uv;
 
-    vec3 offsetPosition = position + computeOffset(position);
-    vec3 offsetPrevious = previous + computeOffset(previous);
-    vec3 offsetNext = next + computeOffset(next);
+    vec4 positionColor = texture2D(uTexture, 0.5 + 0.5*position.xz);
+    vec3 actualPosition = position + vec3(0., decodeHeight(positionColor.x), 0.);
+    vec4 previousColor = texture2D(uTexture, previous.xz);
+    vec3 actualPrevious = previous + vec3(0., decodeHeight(previousColor.x), 0.);
+    vec4 nextColor = texture2D(uTexture, next.xz);
+    vec3 actualNext = next + vec3(0., decodeHeight(nextColor.x), 0.);
+
+    vec3 offsetPosition = actualPosition + computeOffset(actualPosition);
+    vec3 offsetPrevious = actualPrevious + computeOffset(actualPrevious);
+    vec3 offsetNext = actualNext + computeOffset(actualNext);
 
     mat4 m = projectionMatrix * modelViewMatrix;
     vec4 finalPosition = m * vec4(offsetPosition, 1.0 );
