@@ -11,7 +11,7 @@ export default class BaseMountain {
         this.container = container;
     }
 
-    getLines(lineMaterial) {
+    getLines(scene, lineMaterial) {
         let lines = []
         for (let i = 1; i < this.lineCount; i++) {
             let tubeXPosition = this.modelXRange[0] + i/this.lineCount*(this.modelXRange[1]-this.modelXRange[0]);

@@ -5,6 +5,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 
 import SampledMountain from "./mountains/sampled";
 import SyntheticMountain from "./mountains/synth";
+import SamplingMountain from "./mountains/sampling";
 
 export class Sketch {
   modelFilePath = './js/textures/scene.gltf';
@@ -95,29 +96,6 @@ export class Sketch {
     this.setupResize();
   }
 
-  probeHeightTexture() {
-    let textureSize = 256;
-    let probingYHeight = 10;
-    let probingDirection = new THREE.Vector3(0, -1, 0);
-
-    let heights = [];
-    let i = 0;
-    for (let x = 0; x < textureSize; x++) {
-      let xPosition = this.modelXRange[0] + x / textureSize * (this.modelXRange[1] - this.modelXRange[0]);
-      for (let z = 0; z < textureSize; z++) {
-        let zPosition = this.modelZRange[0] + z / textureSize * (this.modelZRange[1] - this.modelZRange[0]);
-        let casterOrigin = new THREE.Vector3(xPosition, probingYHeight, zPosition);
-        this.caster.set(casterOrigin, probingDirection);
-        let intersects = this.caster.intersectObjects(this.loadedModel.children);
-        heights.push(intersects.length > 0 ? intersects[0].point.y : 0);
-        i++;
-        console.log(i / textureSize ** 2 * 100);
-      }
-    }
-
-    console.log(JSON.stringify(heights));
-  }
-
   getLineMaterial() {
     let material = new MeshLineMaterial({ color: new THREE.Color(0xffffff), lineWidth: 0.002});
     let vShader = this.mountains.getLineVertexShader();
@@ -160,7 +138,7 @@ export class Sketch {
           let loadedScene = gltf.scene;
           loadedScene.updateMatrixWorld();
           sketch.loadedModel = loadedScene;
-          sketch.mountains.getLines(sketch.lineMaterial).forEach(line => sketch.scene.add(line));
+          sketch.mountains.getLines(loadedScene, sketch.lineMaterial).forEach(line => sketch.scene.add(line));
         },
         function ( xhr ) {
           console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
@@ -185,7 +163,7 @@ export class Sketch {
 }
 
 let container = document.getElementById("container");
-let mountains = new SampledMountain(container);
+let mountains = new SamplingMountain(container);
 let sketch = new Sketch({dom: container}, mountains);
 
 document.onmousemove = function(e) {
