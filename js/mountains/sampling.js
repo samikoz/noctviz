@@ -1,7 +1,5 @@
 import * as THREE from "three";
 
-import vertexLine from '../shader/vertexModelLine.glsl'
-import fragmentLine from '../shader/fragmentModelLine.glsl'
 import BaseMountain from "./base";
 import {MeshLineGeometry} from "meshline";
 
@@ -12,7 +10,7 @@ export default class SamplingMountain extends BaseMountain {
     }
 
     getLines(scene, lineMaterial) {
-        let textureSize = 32;
+        let textureSize = 512;
         let probingYHeight = 10;
         let probingDirection = new THREE.Vector3(0, -1, 0);
 

@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import heightsTexture from "../textures/scene256.png";
+import heightsTexture from "../textures/panchLil512.png";
 
 import vertexLine from '../shader/vertexModelLine.glsl'
 import fragmentLine from '../shader/fragmentModelLine.glsl'

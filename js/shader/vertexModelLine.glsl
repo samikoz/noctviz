@@ -53,7 +53,7 @@ void main() {
     vColor = vec4( color, opacity );
     vUV = uv;
 
-    vec4 positionColor = texture2D(uTexture, 0.5 + 0.5*position.xz);
+    vec4 positionColor = texture2D(uTexture, vec2(0.5) + 0.5*vec2(position.z, -position.x));
     vec3 actualPosition = position + vec3(0., decodeHeight(positionColor.x), 0.);
     vec4 previousColor = texture2D(uTexture, previous.xz);
     vec3 actualPrevious = previous + vec3(0., decodeHeight(previousColor.x), 0.);

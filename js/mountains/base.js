@@ -4,8 +4,8 @@ import {MeshLineGeometry} from "meshline";
 export default class BaseMountain {
     modelXRange = [-1, 1];
     modelZRange = [-1, 1];
-    lineCount = 20;
-    lineSampleCount = 100;
+    lineCount = 100;
+    lineSampleCount = 200;
 
     constructor(container) {
         this.container = container;

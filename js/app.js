@@ -8,8 +8,7 @@ import SyntheticMountain from "./mountains/synth";
 import SamplingMountain from "./mountains/sampling";
 
 export class Sketch {
-  modelFilePath = './js/textures/scene.gltf';
-
+  modelFilePath = './js/textures/panchLil.glb';
   timedelta = 0.05;
 
   /*
@@ -163,7 +162,7 @@ export class Sketch {
 }
 
 let container = document.getElementById("container");
-let mountains = new SamplingMountain(container);
+let mountains = new SampledMountain(container);
 let sketch = new Sketch({dom: container}, mountains);
 
 document.onmousemove = function(e) {
