@@ -11,33 +11,6 @@ export class Sketch {
   modelFilePath = './js/textures/panchLil.glb';
   timedelta = 0.05;
 
-  /*
-  Charcoal
-  #222323
-  Cream
-  #F5EAE5
-  Lavender
-  #B1A8D2
-  Jet Black
-  #1A1A1A
-  Peach
-  #EEC4C4
-  Blue
-  #9DD3D9
-  Off-white
-  #FCFCFC
-  Green
-  #BEDCCE
-  Beige
-  #EAD4C8
-  Grey
-  #A6A6A6
-  Purple
-  #D1A4CB
-  Blue Grey
-  #BCC3D2
-  */
-
   constructor(options, mountains) {
     this.scene = new THREE.Scene();
     this.mountains = mountains;
@@ -85,9 +58,18 @@ export class Sketch {
       },
       uTexture: {
         value: null
+      },
+      uLineIndex: {
+        type: "f",
+        value: 0
       }
     };
-    this.lineMaterial = this.getLineMaterial();
+    this.lineMaterials = [];
+    for (let i = 0; i < this.mountains.lineColorCount; i++) {
+      let lineMaterial = this.getLineMaterial();
+      lineMaterial.uniforms.uLineIndex = {type: "f", value: i};
+      this.lineMaterials.push(lineMaterial);
+    }
 
     this.resize();
     this.addObjects();
@@ -137,7 +119,7 @@ export class Sketch {
           let loadedScene = gltf.scene;
           loadedScene.updateMatrixWorld();
           sketch.loadedModel = loadedScene;
-          sketch.mountains.getLines(loadedScene, sketch.lineMaterial).forEach(line => sketch.scene.add(line));
+          sketch.mountains.getLines(loadedScene, sketch.lineMaterials).forEach(line => sketch.scene.add(line));
         },
         function ( xhr ) {
           console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
@@ -155,7 +137,7 @@ export class Sketch {
 
     requestAnimationFrame(this.render.bind(this));
 
-    this.lineMaterial.uniforms.uTexture.value = this.mountains.renderTexture(this.renderer);
+    this.uniforms.uTexture.value = this.mountains.renderTexture(this.renderer);
     this.renderer.setRenderTarget(null);
     this.renderer.render(this.scene, this.camera);
   }

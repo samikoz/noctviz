@@ -9,7 +9,7 @@ export default class SamplingMountain extends BaseMountain {
         this.caster = new THREE.Raycaster();
     }
 
-    getLines(scene, lineMaterial) {
+    getLines(scene, lineMaterials) {
         let textureSize = 512;
         let probingYHeight = 10;
         let probingDirection = new THREE.Vector3(0, -1, 0);
@@ -34,7 +34,7 @@ export default class SamplingMountain extends BaseMountain {
 
             const geometry = new MeshLineGeometry();
             geometry.setPoints(linePoints);
-            lines.push(new THREE.Mesh(geometry, lineMaterial));
+            lines.push(new THREE.Mesh(geometry, lineMaterials[x % this.lineColorCount]));
         }
 
         console.log(JSON.stringify(heights));

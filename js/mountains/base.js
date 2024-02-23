@@ -5,17 +5,18 @@ export default class BaseMountain {
     modelXRange = [-1, 1];
     modelZRange = [-1, 1];
     lineCount = 100;
+    lineColorCount = 11;
     lineSampleCount = 200;
 
     constructor(container) {
         this.container = container;
     }
 
-    getLines(scene, lineMaterial) {
+    getLines(scene, lineMaterials) {
         let lines = []
         for (let i = 1; i < this.lineCount; i++) {
             let tubeXPosition = this.modelXRange[0] + i/this.lineCount*(this.modelXRange[1]-this.modelXRange[0]);
-            lines.push(this.getLineAt(tubeXPosition, lineMaterial));
+            lines.push(this.getLineAt(tubeXPosition, lineMaterials[i % this.lineColorCount]));
         }
         return lines;
     }

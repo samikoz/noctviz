@@ -26,11 +26,37 @@ uniform float alphaTest;
 uniform vec2 repeat;
 uniform float uTime;
 uniform sampler2D uTexture;
+uniform float uLineIndex;
 
 varying vec2 vUV;
 varying vec4 vColor;
 varying float vCounters;
 varying vec3 vPosition;
+
+vec2 seed = vec2(1235.03, 36.346);
+
+vec3 noctColors[] = vec3[11](
+    vec3((2.*16. + 2.)/255.0, (2.*16. + 3.)/255.0, (2.*16. + 3.)/255.0),
+    vec3((1.5*16. + 5.)/255.0, (14.*16. + 10.)/255.0, (14.*16. + 5.)/255.0),
+    vec3((11.*16. + 1.)/255.0, (10.*16. + 8.)/255.0, (13.*16. + 2.)/255.0),
+    vec3((14.*16. + 14.)/255.0, (12. * 16. + 4.)/255.0, (12. * 16. + 4.)/255.0),
+    vec3((9. * 16. + 13.)/255.0, (13. * 16. + 3.)/255.0, (13. * 16. + 9.)/255.0),
+    vec3((11.*16. + 14.)/255.0, (13. * 16. + 12.)/255.0, (12. * 16. + 14.)/255.0),
+    vec3((14. * 16. + 10.)/255.0, (13. * 16. + 4.)/255.0, (12. * 16. + 8.)/255.0),
+    vec3((10. * 16. + 6.)/255.0, 166./255.0, 166./255.0),
+    vec3((13. * 16. + 1.)/255.0, 164./255.0, (12. * 16. + 11.)/255.0),
+    vec3((11. * 16. + 12.)/255.0, (12. * 16. + 3.)/255.0, (13. * 16. + 2.)/255.0),
+    vec3((15.*16. + 12.)/255.0, (15.*16. + 12.)/255.0, (15.*16. + 12.)/255.0)
+);
+
+float rand()
+{
+    return fract(sin(dot(seed*uTime ,vec2(12.9898,78.233))) * 43758.5453);
+}
+
+int randIndex() {
+    return int(11.*rand());
+}
 
 void main() {
     #if defined(USE_LOGDEPTHBUF) && defined(USE_LOGDEPTHBUF_EXT)
@@ -38,6 +64,7 @@ void main() {
     #endif
 
     vec4 c = vColor;
+    c = vec4(noctColors[int(uLineIndex)], 1);
 
     if (useMap == 1.) c *= texture2D(map, vUV * repeat);
     if (useAlphaMap == 1.) c.a *= texture2D(alphaMap, vUV * repeat).a;
