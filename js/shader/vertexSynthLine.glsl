@@ -22,12 +22,11 @@ uniform vec3 color;
 uniform float opacity;
 uniform float sizeAttenuation;
 uniform vec3 uMouseWorldPosition;
-uniform sampler2D uNoise;
+uniform sampler2D uTexture;
 
 varying vec2 vUV;
 varying vec4 vColor;
 varying float vCounters;
-varying vec3 vPosition;
 
 vec2 fix( vec4 i, float aspect ) {
     vec2 res = i.xy / i.w;
@@ -37,36 +36,18 @@ vec2 fix( vec4 i, float aspect ) {
 
 }
 
-vec4 computeOffset(vec4 worldPosition) {
-    vec3 mousePosition = 2.*uMouseWorldPosition; //the factor is due to raycasting against the scene from the loaded model but rendering different one
-    return vec4(
-        normalize(-worldPosition.xyz + mousePosition)*(min(length(worldPosition.xyz - mousePosition), 0.2) - 0.2)*vec3(1., sign(worldPosition.y - mousePosition.y), 1.),
-        worldPosition.w);
-}
-
 void main() {
     float aspect = resolution.x / resolution.y;
 
     vColor = vec4( color, opacity );
     vUV = uv;
 
-    //mat4 m = projectionMatrix * modelViewMatrix;
-    //vec4 finalPosition = m * vec4( position, 1.0 );
-    //vec4 prevPos = m * vec4( previous, 1.0 );
-    //vec4 nextPos = m * vec4( next, 1.0 );
-
     vec4 worldPosition = (modelMatrix * vec4(position, 1.0));
     vec4 prevWorldPosition = (modelMatrix * vec4(previous, 1.0));
     vec4 nextWorldPosition = (modelMatrix * vec4(next, 1.0));
 
-    vec4 sampledMountainColor = texture2D(uNoise, vec2(0.5) + 0.5*worldPosition.xz);
+    vec4 sampledMountainColor = texture2D(uTexture, vec2(0.5) + 0.5*worldPosition.xz);
     worldPosition.y = 0.5 * sampledMountainColor.x;
-
-    //worldPosition += computeOffset(worldPosition);
-    //prevWorldPosition += computeOffset(prevWorldPosition);
-    //nextWorldPosition += computeOffset(nextWorldPosition);
-
-    vPosition = worldPosition.xyz;
 
     mat4 m = projectionMatrix * viewMatrix;
     vec4 finalPosition = m * worldPosition;
@@ -109,13 +90,13 @@ void main() {
     #ifdef USE_LOGDEPTHBUF
         #ifdef USE_LOGDEPTHBUF_EXT
             vFragDepth = 1.0 + gl_Position.w;
-        vIsPerspective = float( isPerspectiveMatrix( projectionMatrix ) );
-        #else
+    vIsPerspective = float( isPerspectiveMatrix( projectionMatrix ) );
+    #else
             if ( isPerspectiveMatrix( projectionMatrix ) ) {
-            gl_Position.z = log2( max( EPSILON, gl_Position.w + 1.0 ) ) * logDepthBufFC - 1.0;
-            gl_Position.z *= gl_Position.w;
-        }
-        #endif
+        gl_Position.z = log2( max( EPSILON, gl_Position.w + 1.0 ) ) * logDepthBufFC - 1.0;
+        gl_Position.z *= gl_Position.w;
+    }
+    #endif
     #endif
     vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
     #ifdef USE_FOG

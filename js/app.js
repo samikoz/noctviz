@@ -3,11 +3,8 @@ import { MeshLineGeometry, MeshLineMaterial } from 'meshline'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 
-import vertexLine from './shader/vertexLine.glsl'
-import vertex from './shader/vertex.glsl'
-import fragmentLine from './shader/fragmentLine.glsl'
-import fragment from './shader/fragment.glsl'
-import heightsTexture from './textures/scene256.png'
+import SampledMountain from "./mountains/sampled";
+import SyntheticMountain from "./mountains/synth";
 
 export class Sketch {
   modelFilePath = './modelflow/textures/scene.gltf';
@@ -15,6 +12,8 @@ export class Sketch {
   modelZRange = [-1, 1];
   lineCount = 20;
   lineSampleCount = 100;
+
+  timedelta = 0.05;
 
   /*
   Charcoal
@@ -43,8 +42,10 @@ export class Sketch {
   #BCC3D2
   */
 
-  constructor(options) {
+  constructor(options, mountains) {
     this.scene = new THREE.Scene();
+    this.mountains = mountains;
+    this.mountains.setupFBO();
 
     this.container = options.dom;
     this.width = this.container.offsetWidth;
@@ -87,46 +88,16 @@ export class Sketch {
         value: 0.1,
       },
       uTexture: {
-        value: new THREE.TextureLoader().load(heightsTexture)
+        value: null
       }
     };
     this.lineMaterial = this.getLineMaterial();
 
-    this.setupFBO();
     this.resize();
     this.addObjects();
     this.addLines()
     this.render();
     this.setupResize();
-  }
-
-  setupFBO() {
-    this.fboScene = new THREE.Scene();
-    this.fboCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, -1, 1);
-    this.fboCamera.position.set(0, 0, 1);
-    this.fboCamera.lookAt(0, 0, 0);
-
-    /*
-    let geometry = new THREE.PlaneGeometry(2, 2);
-    this.fboMaterial = new THREE.ShaderMaterial({
-      uniforms: {
-        uTime: {value: 0},
-        uTexture: {value: new THREE.TextureLoader().load(heightsTexture)}
-      },
-      vertexShader: vertex,
-      fragmentShader: fragment,
-    });
-
-    this.fboMesh = new THREE.Mesh(geometry, this.fboMaterial);
-    this.fboScene.add(this.fboMesh);
-     */
-  }
-
-  renderTexture() {
-    if (this.loadedTexture === null) {
-      this.loadedTexture = new THREE.TextureLoader().load(heightsTexture);
-    }
-    return new THREE.TextureLoader().load(heightsTexture);
   }
 
   addLines() {
@@ -172,44 +143,18 @@ export class Sketch {
     console.log(JSON.stringify(heights));
   }
 
-  /*
-  loadHeightTexture() {
-    let textureSize = 256;
-    let data = new Float32Array(textureSize * textureSize * 4);
-    for (let i = 0; i < textureSize; x++) {
-      let index = (x + z * textureSize) * 4;
-      let intersectionHeight = this.encodeHeight(intersects[0].point.y);
-      data[index + 0] = intersectionHeight;
-      data[index + 1] = intersectionHeight;
-      data[index + 2] = intersectionHeight;
-    }
-
-    let texture = new THREE.DataTexture(this.data, this.size, this.size, THREE.RGBAFormat, THREE.FloatType);
-    texture.needsUpdate = true;
-
-    let geometry = new THREE.PlaneGeometry(2, 2);
-
-    let fboMaterial = new THREE.ShaderMaterial({
-      uniforms: {
-        uTime: {value: 0},
-        uHeightTexture: {value: texture}
-      },
-      vertexShader: vertex,
-      fragmentShader: fragment,
-    });
-
-    let fboMesh = new THREE.Mesh(geometry, fboMaterial);
-    this.fboScene.add(fboMesh);
-
-  }
-  */
-
   getLineMaterial() {
     let material = new MeshLineMaterial({ color: new THREE.Color(0xffffff), lineWidth: 0.002});
-    material.vertexShader = vertexLine;
-    material.fragmentShader = fragmentLine;
+    let vShader = this.mountains.getLineVertexShader();
+    if (vShader !== undefined) {
+      material.vertexShader = vShader;
+    }
+    let fShader = this.mountains.getLineFragmentShader();
+    if (fShader !== undefined) {
+      material.fragmentShader = fShader;
+    }
     material.transparent = true;
-    //material.neeedsUpdate = true;
+    material.neeedsUpdate = true;
     let newUniforms = {};
     Object.assign(newUniforms, material.uniforms, this.uniforms);
 
@@ -250,32 +195,22 @@ export class Sketch {
     );
   }
 
-  stop() {
-    this.isPlaying = false;
-  }
-
-  play() {
-    if(!this.isPlaying){
-      this.render()
-      this.isPlaying = true;
-    }
-  }
-
   render() {
     if (!this.isPlaying) return;
-    this.uniforms.uTime.value += 0.05;
+    this.uniforms.uTime.value += this.timedelta;
+    this.mountains.advanceTime(this.timedelta);
 
     requestAnimationFrame(this.render.bind(this));
 
-    //this.lineMaterial.uniforms.uTexture.value = this.renderTexture()
+    this.lineMaterial.uniforms.uTexture.value = this.mountains.renderTexture(this.renderer);
     this.renderer.setRenderTarget(null);
     this.renderer.render(this.scene, this.camera);
   }
 }
 
-let sketch = new Sketch({
-  dom: document.getElementById("container")
-});
+let container = document.getElementById("container");
+let mountains = new SyntheticMountain(container);
+let sketch = new Sketch({dom: container}, mountains);
 
 document.onmousemove = function(e) {
   let mousePositionX = (e.pageX / sketch.width) * 2 - 1;
