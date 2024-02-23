@@ -3,12 +3,9 @@ import * as THREE from "three";
 import noiseVertex from "../shader/noiseVertex.glsl";
 import noiseFragment from "../shader/noiseFragment.glsl";
 import vertexLine from "../shader/vertexSynthLine.glsl";
+import BaseMountain from "./base";
 
-export default class SyntheticMountain {
-    constructor(container) {
-        this.container = container;
-    }
-
+export default class SyntheticMountain extends BaseMountain {
     getRenderTarget() {
         return new THREE.WebGLRenderTarget(this.container.offsetWidth, this.container.offsetHeight, {
             minFilter: THREE.NearestFilter,

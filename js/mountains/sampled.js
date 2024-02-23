@@ -3,10 +3,11 @@ import heightsTexture from "../textures/scene256.png";
 
 import vertexLine from '../shader/vertexModelLine.glsl'
 import fragmentLine from '../shader/fragmentModelLine.glsl'
+import BaseMountain from "./base";
 
-export default class SampledMountain {
-    constructor(container) {
-        this.container = container;
+export default class SampledMountain extends BaseMountain {
+    constructor(container)  {
+        super(container);
         this.uniformTexture = null;
     }
 

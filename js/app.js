@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { MeshLineGeometry, MeshLineMaterial } from 'meshline'
+import { MeshLineMaterial } from 'meshline'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 
@@ -7,11 +7,7 @@ import SampledMountain from "./mountains/sampled";
 import SyntheticMountain from "./mountains/synth";
 
 export class Sketch {
-  modelFilePath = './modelflow/textures/scene.gltf';
-  modelXRange = [-1, 1];
-  modelZRange = [-1, 1];
-  lineCount = 20;
-  lineSampleCount = 100;
+  modelFilePath = './js/textures/scene.gltf';
 
   timedelta = 0.05;
 
@@ -95,29 +91,8 @@ export class Sketch {
 
     this.resize();
     this.addObjects();
-    this.addLines()
     this.render();
     this.setupResize();
-  }
-
-  addLines() {
-    for (let i = 1; i < this.lineCount; i++) {
-      let tubeXPosition = this.modelXRange[0] + i/this.lineCount*(this.modelXRange[1]-this.modelXRange[0]);
-      this.scene.add(this.getLineAt(tubeXPosition));
-    }
-  }
-
-  getLineAt(x) {
-    let linePoints = [];
-    for (let i = 0; i < this.lineSampleCount; i++) {
-      let zPosition = this.modelZRange[0] + i/this.lineSampleCount*(this.modelZRange[1]-this.modelZRange[0]);
-      linePoints.push(new THREE.Vector3(x, 0, zPosition));
-    }
-
-    const geometry = new MeshLineGeometry()
-    geometry.setPoints(linePoints)
-    const material = this.lineMaterial
-    return new THREE.Mesh(geometry, material)
   }
 
   probeHeightTexture() {
@@ -185,6 +160,7 @@ export class Sketch {
           let loadedScene = gltf.scene;
           loadedScene.updateMatrixWorld();
           sketch.loadedModel = loadedScene;
+          sketch.mountains.getLines(sketch.lineMaterial).forEach(line => sketch.scene.add(line));
         },
         function ( xhr ) {
           console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
@@ -209,7 +185,7 @@ export class Sketch {
 }
 
 let container = document.getElementById("container");
-let mountains = new SyntheticMountain(container);
+let mountains = new SampledMountain(container);
 let sketch = new Sketch({dom: container}, mountains);
 
 document.onmousemove = function(e) {
