@@ -56,6 +56,10 @@ export class Sketch {
         type: "f",
         value: 0.1,
       },
+      uLineSpeed: {
+        type: "f",
+        value: 0.5,
+      },
       uTexture: {
         value: null
       },

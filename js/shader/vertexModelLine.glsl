@@ -28,6 +28,7 @@ uniform sampler2D uTexture;
 varying vec2 vUV;
 varying vec4 vColor;
 varying float vCounters;
+varying vec3 vPosition;
 
 float PI = 3.141592653589793238;
 
@@ -52,6 +53,8 @@ void main() {
 
     vColor = vec4( color, opacity );
     vUV = uv;
+
+    vPosition = position;
 
     vec4 positionColor = texture2D(uTexture, vec2(0.5) + 0.5*vec2(position.z, -position.x));
     vec3 actualPosition = position + vec3(0., decodeHeight(positionColor.x), 0.);

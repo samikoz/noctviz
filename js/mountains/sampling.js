@@ -10,7 +10,7 @@ export default class SamplingMountain extends BaseMountain {
     }
 
     getLines(scene, lineMaterials) {
-        let textureSize = 512;
+        let textureSize = 1024;
         let probingYHeight = 10;
         let probingDirection = new THREE.Vector3(0, -1, 0);
 
@@ -29,7 +29,10 @@ export default class SamplingMountain extends BaseMountain {
                 heights.push(height);
                 linePoints.push(new THREE.Vector3(xPosition, height, zPosition));
                 progressIndex++;
-                console.log(progressIndex / textureSize ** 2 * 100);
+                if (progressIndex % (1024 * 1024 / 4) === 0) {
+                    console.log(JSON.stringify(heights));
+                    heights = [];
+                }
             }
 
             const geometry = new MeshLineGeometry();
@@ -37,7 +40,7 @@ export default class SamplingMountain extends BaseMountain {
             lines.push(new THREE.Mesh(geometry, lineMaterials[x % this.lineColorCount]));
         }
 
-        console.log(JSON.stringify(heights));
+        //console.log(JSON.stringify(heights));
         return lines;
     }
 
