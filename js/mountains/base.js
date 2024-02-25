@@ -5,7 +5,7 @@ export default class BaseMountain {
     modelXRange = [-1, 1];
     modelZRange = [-1, 1];
     lineCount = 100;
-    lineColorCount = 11;
+    lineColorCount = 6;
     lineSampleCount = 200;
 
     constructor(container) {

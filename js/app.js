@@ -22,7 +22,7 @@ export class Sketch {
     this.renderer = new THREE.WebGLRenderer();
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(this.width, this.height);
-    this.renderer.setClearColor(0x000000, 1);
+    this.renderer.setClearColor(0x222323, 1);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace
 
     this.container.appendChild(this.renderer.domElement);
@@ -54,11 +54,11 @@ export class Sketch {
       },
       uDistortionSize: {
         type: "f",
-        value: 0.1,
+        value: 0.05,
       },
       uLineSpeed: {
         type: "f",
-        value: 0.5,
+        value: 0.25,
       },
       uTexture: {
         value: null

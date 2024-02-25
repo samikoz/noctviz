@@ -24,6 +24,7 @@ uniform float sizeAttenuation;
 uniform vec3 uMousePosition;
 uniform float uDistortionSize;
 uniform sampler2D uTexture;
+uniform float uTime;
 
 varying vec2 vUV;
 varying vec4 vColor;
@@ -31,6 +32,32 @@ varying float vCounters;
 varying vec3 vPosition;
 
 float PI = 3.141592653589793238;
+
+float mod289(float x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
+vec4 mod289(vec4 x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
+vec4 perm(vec4 x){return mod289(((x * 34.0) + 1.0) * x);}
+
+float noise(vec3 p){
+    vec3 a = floor(p);
+    vec3 d = p - a;
+    d = d * d * (3.0 - 2.0 * d);
+
+    vec4 b = a.xxyy + vec4(0.0, 1.0, 0.0, 1.0);
+    vec4 k1 = perm(b.xyxy);
+    vec4 k2 = perm(k1.xyxy + b.zzww);
+
+    vec4 c = k2 + a.zzzz;
+    vec4 k3 = perm(c);
+    vec4 k4 = perm(c + 1.0);
+
+    vec4 o1 = fract(k3 * (1.0 / 41.0));
+    vec4 o2 = fract(k4 * (1.0 / 41.0));
+
+    vec4 o3 = o2 * d.z + o1 * (1.0 - d.z);
+    vec2 o4 = o3.yw * d.x + o3.xz * (1.0 - d.x);
+
+    return o4.y * d.y + o4.x * (1.0 - d.y);
+}
 
 vec2 fix( vec4 i, float aspect ) {
     vec2 res = i.xy / i.w;
@@ -44,8 +71,12 @@ float decodeHeight(float encodedColor) {
     return tan(PI*(encodedColor - 0.5));
 }
 
-vec3 computeOffset(vec3 worldPosition) {
-    return normalize(-worldPosition.xyz + uMousePosition)*(min(length(worldPosition.xyz - uMousePosition), uDistortionSize) - uDistortionSize);
+float computeNoise(vec3 position) {
+    return 0.1*noise(vec3(position.x + uTime*0.1, 0., 10.*position.z + uTime*0.1));
+}
+
+vec3 mouseOffset(vec3 position) {
+    return normalize(-position.xyz + uMousePosition)*(min(length(position.xyz - uMousePosition), uDistortionSize) - uDistortionSize);
 }
 
 void main() {
@@ -56,21 +87,25 @@ void main() {
 
     vPosition = position;
 
-    vec4 positionColor = texture2D(uTexture, vec2(0.5) + 0.5*vec2(position.z, -position.x));
-    vec3 actualPosition = position + vec3(0., decodeHeight(positionColor.x), 0.);
-    vec4 previousColor = texture2D(uTexture, previous.xz);
-    vec3 actualPrevious = previous + vec3(0., decodeHeight(previousColor.x), 0.);
-    vec4 nextColor = texture2D(uTexture, next.xz);
-    vec3 actualNext = next + vec3(0., decodeHeight(nextColor.x), 0.);
+    vec3 noisedPosition = vec3(position.x + computeNoise(position), position.yz);
+    vec3 noisedPrevious = vec3(previous.x + computeNoise(previous), previous.yz);
+    vec3 noisedNext = vec3(next.x + computeNoise(next), next.yz);
 
-    vec3 offsetPosition = actualPosition + computeOffset(actualPosition);
-    vec3 offsetPrevious = actualPrevious + computeOffset(actualPrevious);
-    vec3 offsetNext = actualNext + computeOffset(actualNext);
+    vec4 positionColor = texture2D(uTexture, vec2(0.5) + 0.5*vec2(noisedPosition.z, -noisedPosition.x));
+    vec3 actualPosition = noisedPosition + vec3(0., decodeHeight(positionColor.x), 0.);
+    vec4 previousColor = texture2D(uTexture, vec2(0.5) + 0.5*vec2(noisedPrevious.z, -noisedPrevious.x));
+    vec3 actualPrevious = noisedPrevious + vec3(0., decodeHeight(previousColor.x), 0.);
+    vec4 nextColor = texture2D(uTexture, vec2(0.5) + 0.5*vec2(noisedNext.z, -noisedNext.x));
+    vec3 actualNext = noisedNext + vec3(0., decodeHeight(nextColor.x), 0.);
+
+    actualPosition += mouseOffset(actualPosition);
+    actualPrevious += mouseOffset(actualPrevious);
+    actualNext += mouseOffset(actualNext);
 
     mat4 m = projectionMatrix * modelViewMatrix;
-    vec4 finalPosition = m * vec4(offsetPosition, 1.0 );
-    vec4 prevPos = m * vec4(offsetPrevious, 1.0 );
-    vec4 nextPos = m * vec4(offsetNext, 1.0 );
+    vec4 finalPosition = m * vec4(actualPosition, 1.0 );
+    vec4 prevPos = m * vec4(actualPrevious, 1.0 );
+    vec4 nextPos = m * vec4(actualNext, 1.0 );
 
     vec2 currentP = fix( finalPosition, aspect );
     vec2 prevP = fix( prevPos, aspect );

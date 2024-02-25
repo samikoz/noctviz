@@ -27,6 +27,7 @@ uniform sampler2D uTexture;
 varying vec2 vUV;
 varying vec4 vColor;
 varying float vCounters;
+varying vec3 vPosition;
 
 vec2 fix( vec4 i, float aspect ) {
     vec2 res = i.xy / i.w;
@@ -41,6 +42,7 @@ void main() {
 
     vColor = vec4( color, opacity );
     vUV = uv;
+    vPosition = position;
 
     vec4 worldPosition = (modelMatrix * vec4(position, 1.0));
     vec4 prevWorldPosition = (modelMatrix * vec4(previous, 1.0));
