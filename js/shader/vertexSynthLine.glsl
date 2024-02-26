@@ -23,6 +23,7 @@ uniform float opacity;
 uniform float sizeAttenuation;
 uniform vec3 uMouseWorldPosition;
 uniform sampler2D uTexture;
+uniform float uTime;
 
 varying vec2 vUV;
 varying vec4 vColor;
@@ -37,6 +38,36 @@ vec2 fix( vec4 i, float aspect ) {
 
 }
 
+float mod289(float x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
+vec4 mod289(vec4 x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
+vec4 perm(vec4 x){return mod289(((x * 34.0) + 1.0) * x);}
+
+float noise(vec3 p){
+    vec3 a = floor(p);
+    vec3 d = p - a;
+    d = d * d * (3.0 - 2.0 * d);
+
+    vec4 b = a.xxyy + vec4(0.0, 1.0, 0.0, 1.0);
+    vec4 k1 = perm(b.xyxy);
+    vec4 k2 = perm(k1.xyxy + b.zzww);
+
+    vec4 c = k2 + a.zzzz;
+    vec4 k3 = perm(c);
+    vec4 k4 = perm(c + 1.0);
+
+    vec4 o1 = fract(k3 * (1.0 / 41.0));
+    vec4 o2 = fract(k4 * (1.0 / 41.0));
+
+    vec4 o3 = o2 * d.z + o1 * (1.0 - d.z);
+    vec2 o4 = o3.yw * d.x + o3.xz * (1.0 - d.x);
+
+    return o4.y * d.y + o4.x * (1.0 - d.y);
+}
+
+float computeNoise(vec3 position) {
+    return 0.1*noise(vec3(position.x + uTime*0.1, 0., 10.*position.z + uTime*0.1));
+}
+
 void main() {
     float aspect = resolution.x / resolution.y;
 
@@ -44,12 +75,14 @@ void main() {
     vUV = uv;
     vPosition = position;
 
-    vec4 worldPosition = (modelMatrix * vec4(position, 1.0));
+    vec4 sampledMountainColor = texture2D(uTexture, vec2(0.5) + 0.25*vec2(position.z, -position.x));
+    vec3 actualPosition = position + vec3(0., 0.6 * sampledMountainColor.x, 0.);
+    actualPosition.x = actualPosition.x + computeNoise(actualPosition.xyz);
+
+    vec4 worldPosition = (modelMatrix * vec4(actualPosition, 1.0));
     vec4 prevWorldPosition = (modelMatrix * vec4(previous, 1.0));
     vec4 nextWorldPosition = (modelMatrix * vec4(next, 1.0));
 
-    vec4 sampledMountainColor = texture2D(uTexture, vec2(0.5) + 0.5*worldPosition.xz);
-    worldPosition.y = 0.5 * sampledMountainColor.x;
 
     mat4 m = projectionMatrix * viewMatrix;
     vec4 finalPosition = m * worldPosition;

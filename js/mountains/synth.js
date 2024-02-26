@@ -3,6 +3,7 @@ import * as THREE from "three";
 import noiseVertex from "../shader/noiseVertex.glsl";
 import noiseFragment from "../shader/noiseFragment.glsl";
 import vertexLine from "../shader/vertexSynthLine.glsl";
+import fragmentLine from '../shader/fragmentModelLine.glsl'
 import BaseMountain from "./base";
 
 export default class SyntheticMountain extends BaseMountain {
@@ -48,9 +49,9 @@ export default class SyntheticMountain extends BaseMountain {
     }
 
     getLineFragmentShader() {
+        return fragmentLine;
     }
 
     advanceTime(delta) {
-        this.fboMaterial.uniforms.uTime.value += delta;
     }
 }

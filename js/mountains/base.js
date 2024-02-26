@@ -2,11 +2,11 @@ import * as THREE from "three";
 import {MeshLineGeometry} from "meshline";
 
 export default class BaseMountain {
-    modelXRange = [-1, 1];
-    modelZRange = [-1, 1];
+    modelXRange = [-2, 2];
+    modelZRange = [-2, 2];
     lineCount = 100;
     lineColorCount = 6;
-    lineSampleCount = 200;
+    lineSampleCount = 300;
 
     constructor(container) {
         this.container = container;

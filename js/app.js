@@ -58,7 +58,7 @@ export class Sketch {
       },
       uLineSpeed: {
         type: "f",
-        value: 0.25,
+        value: 0.5,
       },
       uTexture: {
         value: null
@@ -148,7 +148,7 @@ export class Sketch {
 }
 
 let container = document.getElementById("container");
-let mountains = new SampledMountain(container);
+let mountains = new SyntheticMountain(container);
 let sketch = new Sketch({dom: container}, mountains);
 
 document.onmousemove = function(e) {
