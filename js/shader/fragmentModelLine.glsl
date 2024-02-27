@@ -28,6 +28,9 @@ uniform float uTime;
 uniform sampler2D uTexture;
 uniform float uLineIndex;
 uniform float uLineSpeed;
+uniform vec3 uLookDirection;
+uniform vec3 uEyePosition;
+uniform float uDistortionSize;
 
 varying vec2 vUV;
 varying vec4 vColor;
@@ -81,6 +84,12 @@ float rand(vec2 seed)
     return fract(sin(dot(seed*uTime ,vec2(12.9898,78.233))) * 43758.5453);
 }
 
+vec3 mouseOffset(vec3 p) {
+    float lambda = (dot(p, uLookDirection) - dot(uEyePosition, uLookDirection))/dot(uLookDirection, uLookDirection);
+    return p - (uEyePosition + uLookDirection*lambda);
+    //return normalize(-p.xyz + closestPoint)*(min(length(p.xyz - closestPoint), uDistortionSize) - uDistortionSize);
+}
+
 void main() {
     #if defined(USE_LOGDEPTHBUF) && defined(USE_LOGDEPTHBUF_EXT)
         gl_FragDepthEXT = vIsPerspective == 0.0 ? gl_FragCoord.z : log2(vFragDepth) * logDepthBufFC * 0.5;
@@ -98,6 +107,10 @@ void main() {
     if (c.a < alphaTest) discard;
     if (useDash == 1.) {
         c.a *= ceil(mod(vCounters + dashOffset, dashArray) - (dashArray * dashRatio));
+    }
+
+    if (length(mouseOffset(vPosition)) < uDistortionSize) {
+        c = vec4(1., 0., 0., 1.);
     }
 
     gl_FragColor = c;

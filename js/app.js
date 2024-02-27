@@ -48,7 +48,11 @@ export class Sketch {
         type: "v2",
         value: new THREE.Vector2()
       },
-      uMousePosition: {
+      uLookDirection: {
+        type: "v3",
+        value: new THREE.Vector3()
+      },
+      uEyePosition: {
         type: "v3",
         value: new THREE.Vector3()
       },
@@ -156,11 +160,6 @@ document.onmousemove = function(e) {
   let mousePositionY = -((e.pageY / sketch.height) * 2 - 1);
 
   sketch.caster.setFromCamera(new THREE.Vector2(mousePositionX, mousePositionY), sketch.camera);
-  let intersects = sketch.caster.intersectObjects(sketch.loadedModel.children);
-  if (intersects.length > 0) {
-    sketch.uniforms.uMousePosition.value = intersects[0].point;
-  }
-  else {
-    sketch.uniforms.uMousePosition.value = new THREE.Vector3(10^10, 10^10, 10^10);
-  }
+  sketch.uniforms.uLookDirection.value = sketch.caster.ray.direction;
+  sketch.uniforms.uEyePosition.value = sketch.caster.ray.origin;
 }

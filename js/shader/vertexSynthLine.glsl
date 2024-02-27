@@ -21,7 +21,9 @@ uniform float lineWidth;
 uniform vec3 color;
 uniform float opacity;
 uniform float sizeAttenuation;
-uniform vec3 uMouseWorldPosition;
+uniform vec3 uLookDirection;
+uniform vec3 uEyePosition;
+uniform float uDistortionSize;
 uniform sampler2D uTexture;
 uniform float uTime;
 
@@ -73,11 +75,12 @@ void main() {
 
     vColor = vec4( color, opacity );
     vUV = uv;
-    vPosition = position;
 
     vec4 sampledMountainColor = texture2D(uTexture, vec2(0.5) + 0.25*vec2(position.z, -position.x));
     vec3 actualPosition = position + vec3(0., 0.6 * sampledMountainColor.x, 0.);
     actualPosition.x = actualPosition.x + computeNoise(actualPosition.xyz);
+
+    vPosition = actualPosition;
 
     vec4 worldPosition = (modelMatrix * vec4(actualPosition, 1.0));
     vec4 prevWorldPosition = (modelMatrix * vec4(previous, 1.0));
