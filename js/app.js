@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { MeshLineMaterial } from 'meshline'
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 
 import SyntheticMountains from "./mountains";
@@ -63,27 +62,18 @@ export class Sketch {
       },
       uTexture: {
         value: null
-      },
-      uLineIndex: {
-        type: "f",
-        value: 0
       }
     };
-    this.lineMaterials = [];
-    for (let i = 0; i < this.mountains.lineColorCount; i++) {
-      let lineMaterial = this.getLineMaterial();
-      lineMaterial.uniforms.uLineIndex = {type: "f", value: i};
-      this.lineMaterials.push(lineMaterial);
-    }
+    this.lineMaterial = this.getLineMaterial();
 
     this.resize();
-    this.mountains.getLines(this.lineMaterials).forEach(line => this.scene.add(line));
+    this.mountains.getLines(this.lineMaterial).forEach(line => this.scene.add(line));
     this.render();
     this.setupResize();
   }
 
   getLineMaterial() {
-    let material = new MeshLineMaterial({ color: new THREE.Color(0xffffff), lineWidth: 0.002});
+    let material = new MeshLineMaterial({ lineWidth: 0.002});
     let vShader = this.mountains.getLineVertexShader();
     if (vShader !== undefined) {
       material.vertexShader = vShader;

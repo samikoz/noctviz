@@ -46,11 +46,11 @@ export default class SyntheticMountains {
         });
     }
 
-    getLines(lineMaterials) {
+    getLines(lineMaterial) {
         let lines = []
         for (let i = 1; i < this.lineCount; i++) {
             let tubeXPosition = this.modelXRange[0] + i/this.lineCount*(this.modelXRange[1]-this.modelXRange[0]);
-            lines.push(this.getLineAt(tubeXPosition, lineMaterials[i % this.lineColorCount]));
+            lines.push(this.getLineAt(tubeXPosition, lineMaterial));
         }
         return lines;
     }
