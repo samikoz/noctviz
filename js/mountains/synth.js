@@ -53,5 +53,6 @@ export default class SyntheticMountain extends BaseMountain {
     }
 
     advanceTime(delta) {
+        this.fboMaterial.uniforms.uTime.value += delta;
     }
 }

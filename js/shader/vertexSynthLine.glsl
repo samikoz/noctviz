@@ -66,8 +66,14 @@ float noise(vec3 p){
     return o4.y * d.y + o4.x * (1.0 - d.y);
 }
 
+vec3 rayDistance(vec3 p) {
+    float lambda = (dot(p, uLookDirection) - dot(uEyePosition, uLookDirection))/dot(uLookDirection, uLookDirection);
+    return p - (uEyePosition + uLookDirection*lambda);
+}
+
 float computeNoise(vec3 position) {
-    return 0.1*noise(vec3(position.x + uTime*0.1, 0., 10.*position.z + uTime*0.1));
+    float mouseNoiseContrib = max(uDistortionSize - length(rayDistance(position)), 0.)*20.;
+    return 0.1*noise(vec3(position.x + uTime*0.1, 0., 10.*position.z + mouseNoiseContrib + uTime*0.1));
 }
 
 void main() {

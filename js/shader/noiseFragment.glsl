@@ -31,6 +31,6 @@ float noise(vec3 p){
 
 void main() {
 	gl_FragColor = vec4(
-		vec3(noise(vPosition*6. + vec3(0, uTime*0.5, 0))),
+		vec3(noise(vPosition*6. + vec3(uTime*0.5, 0, 0))),
 		1.);
 }
