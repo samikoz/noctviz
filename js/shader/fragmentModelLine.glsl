@@ -96,11 +96,9 @@ void main() {
     #endif
 
     //vec4 c = vColor;
-    float rand = fract(sin(vPosition.x*12325.23254567));
-    float phase = 2.*rand + vPosition.z - (1.-0.6*(noise(vec3(0, 0, rand))-0.5))*uLineSpeed*uTime;
+    float phase = vPosition.z - (1.-0.2*(noise(vec3(0, 0, uLineIndex))-0.5))*uLineSpeed*uTime;
     float sp = sin(phase);
-    float opacity = abs(sp);
-    vec4 c = vec4(noctColors[(int(phase/PI)) % 6], 1);
+    vec4 c = vec4(noctColors[( int(uLineIndex) + int(phase/PI)) % 6], 1);
 
     if (useMap == 1.) c *= texture2D(map, vUV * repeat);
     if (useAlphaMap == 1.) c.a *= texture2D(alphaMap, vUV * repeat).a;
