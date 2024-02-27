@@ -66,14 +66,14 @@ float noise(vec3 p){
     return o4.y * d.y + o4.x * (1.0 - d.y);
 }
 
-vec3 rayDistance(vec3 p) {
+vec3 lookDirDistance(vec3 p) {
     float lambda = (dot(p, uLookDirection) - dot(uEyePosition, uLookDirection))/dot(uLookDirection, uLookDirection);
     return p - (uEyePosition + uLookDirection*lambda);
 }
 
-float computeNoise(vec3 position) {
-    float mouseNoiseContrib = max(uDistortionSize - length(rayDistance(position)), 0.)*20.;
-    return 0.1*noise(vec3(position.x + uTime*0.1, 0., 10.*position.z + mouseNoiseContrib + uTime*0.1));
+float computeBillowing(vec3 position) {
+    float mouseContrib = max(uDistortionSize - length(lookDirDistance(position)), 0.)*20.;
+    return 0.1*noise(vec3(position.x + uTime*0.1, 0., 10.*position.z + mouseContrib + uTime*0.1));
 }
 
 void main() {
@@ -82,9 +82,9 @@ void main() {
     vColor = vec4( color, opacity );
     vUV = uv;
 
-    vec4 sampledMountainColor = texture2D(uTexture, vec2(0.5) + 0.25*vec2(position.z, -position.x));
-    vec3 actualPosition = position + vec3(0., 0.6 * sampledMountainColor.x, 0.);
-    actualPosition.x = actualPosition.x + computeNoise(actualPosition.xyz);
+    float noiseHeight = 0.65*noise(2.5*vec3(position.x, 0., position.z + uTime*0.15));
+    vec3 actualPosition = position + vec3(0., noiseHeight, 0.);
+    actualPosition.x = actualPosition.x + computeBillowing(actualPosition.xyz);
 
     vPosition = actualPosition;
 

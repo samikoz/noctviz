@@ -3,12 +3,9 @@ import { MeshLineMaterial } from 'meshline'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 
-import SampledMountain from "./mountains/sampled";
-import SyntheticMountain from "./mountains/synth";
-import SamplingMountain from "./mountains/sampling";
+import SyntheticMountains from "./mountains";
 
 export class Sketch {
-  modelFilePath = './js/textures/panchLil.glb';
   timedelta = 0.05;
 
   constructor(options, mountains) {
@@ -80,7 +77,7 @@ export class Sketch {
     }
 
     this.resize();
-    this.addObjects();
+    this.mountains.getLines(this.lineMaterials).forEach(line => this.scene.add(line));
     this.render();
     this.setupResize();
   }
@@ -118,26 +115,6 @@ export class Sketch {
     this.camera.updateProjectionMatrix();
   }
 
-  addObjects() {
-    const sketch = this;
-    let gltfLoader = new GLTFLoader();
-    gltfLoader.load(
-        sketch.modelFilePath,
-        function ( gltf ) {
-          let loadedScene = gltf.scene;
-          loadedScene.updateMatrixWorld();
-          sketch.loadedModel = loadedScene;
-          sketch.mountains.getLines(loadedScene, sketch.lineMaterials).forEach(line => sketch.scene.add(line));
-        },
-        function ( xhr ) {
-          console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
-        },
-        function ( error ) {
-          console.log( 'An error happened:', error );
-        }
-    );
-  }
-
   render() {
     if (!this.isPlaying) return;
     this.uniforms.uTime.value += this.timedelta;
@@ -152,7 +129,7 @@ export class Sketch {
 }
 
 let container = document.getElementById("container");
-let mountains = new SyntheticMountain(container);
+let mountains = new SyntheticMountains(container);
 let sketch = new Sketch({dom: container}, mountains);
 
 document.onmousemove = function(e) {

@@ -28,9 +28,6 @@ uniform float uTime;
 uniform sampler2D uTexture;
 uniform float uLineIndex;
 uniform float uLineSpeed;
-uniform vec3 uLookDirection;
-uniform vec3 uEyePosition;
-uniform float uDistortionSize;
 
 varying vec2 vUV;
 varying vec4 vColor;
@@ -53,46 +50,14 @@ vec3 noctColors[] = vec3[6](
     //off-white vec3((15.*16. + 12.)/255.0, (15.*16. + 12.)/255.0, (15.*16. + 12.)/255.0)
 );
 
-float mod289(float x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
-vec4 mod289(vec4 x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
-vec4 perm(vec4 x){return mod289(((x * 34.0) + 1.0) * x);}
-
-float noise(vec3 p){
-    vec3 a = floor(p);
-    vec3 d = p - a;
-    d = d * d * (3.0 - 2.0 * d);
-
-    vec4 b = a.xxyy + vec4(0.0, 1.0, 0.0, 1.0);
-    vec4 k1 = perm(b.xyxy);
-    vec4 k2 = perm(k1.xyxy + b.zzww);
-
-    vec4 c = k2 + a.zzzz;
-    vec4 k3 = perm(c);
-    vec4 k4 = perm(c + 1.0);
-
-    vec4 o1 = fract(k3 * (1.0 / 41.0));
-    vec4 o2 = fract(k4 * (1.0 / 41.0));
-
-    vec4 o3 = o2 * d.z + o1 * (1.0 - d.z);
-    vec2 o4 = o3.yw * d.x + o3.xz * (1.0 - d.x);
-
-    return o4.y * d.y + o4.x * (1.0 - d.y);
-}
-
-float rand(vec2 seed)
-{
-    return fract(sin(dot(seed*uTime ,vec2(12.9898,78.233))) * 43758.5453);
-}
-
 void main() {
     #if defined(USE_LOGDEPTHBUF) && defined(USE_LOGDEPTHBUF_EXT)
         gl_FragDepthEXT = vIsPerspective == 0.0 ? gl_FragCoord.z : log2(vFragDepth) * logDepthBufFC * 0.5;
     #endif
 
     //vec4 c = vColor;
-    float phase = vPosition.z - (1.-0.2*(noise(vec3(0, 0, uLineIndex))-0.5))*uLineSpeed*uTime;
-    float sp = sin(phase);
-    vec4 c = vec4(noctColors[( int(uLineIndex) + int(phase/PI)) % 6], 1);
+    float phase = vPosition.z - uLineSpeed*uTime;
+    vec4 c = vec4(noctColors[(int(uLineIndex) + int(phase/PI)) % 6], 1);
 
     if (useMap == 1.) c *= texture2D(map, vUV * repeat);
     if (useAlphaMap == 1.) c.a *= texture2D(alphaMap, vUV * repeat).a;
