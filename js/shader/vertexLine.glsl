@@ -71,8 +71,21 @@ vec3 lookDirDistance(vec3 p) {
     return p - (uEyePosition + uLookDirection*lambda);
 }
 
+vec2 flatLookDirDistance(vec2 p) {
+    float lambda = (dot(p, uLookDirection.xz) - dot(uEyePosition.xz, uLookDirection.xz))/dot(uLookDirection.xz, uLookDirection.xz);
+    return p - (uEyePosition.xz + uLookDirection.xz*lambda);
+}
+
+float computeHeight(vec3 p) {
+    float distortion = 2.*uDistortionSize;
+    float flatD = length(flatLookDirDistance(position.xz));
+    float d = 1. - max(distortion - flatD*flatD, 0.)/distortion;
+    float amplitude = 0.65*d;
+    return amplitude*noise(2.5*vec3(p.x, 0., p.z + uTime*0.15));
+}
+
 float computeBillowing(vec3 position) {
-    float mouseContrib = max(uDistortionSize - length(lookDirDistance(position)), 0.)*20.;
+    float mouseContrib = 20.*max(uDistortionSize - length(lookDirDistance(position)), 0.);
     return 0.1*noise(vec3(position.x + uTime*0.1, 0., 10.*position.z + mouseContrib + uTime*0.1));
 }
 
@@ -82,8 +95,7 @@ void main() {
     vColor = vec4( color, opacity );
     vUV = uv;
 
-    float noiseHeight = 0.65*noise(2.5*vec3(position.x, 0., position.z + uTime*0.15));
-    vec3 actualPosition = position + vec3(0., noiseHeight, 0.);
+    vec3 actualPosition = position + vec3(0., computeHeight(position), 0.);
     actualPosition.x = actualPosition.x + computeBillowing(actualPosition.xyz);
 
     vPosition = actualPosition;
