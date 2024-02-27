@@ -26,6 +26,8 @@ uniform vec3 uEyePosition;
 uniform float uDistortionSize;
 uniform sampler2D uTexture;
 uniform float uTime;
+uniform float uBoundX;
+uniform float uBoundZ;
 
 varying vec2 vUV;
 varying vec4 vColor;
@@ -77,11 +79,12 @@ vec2 flatLookDirDistance(vec2 p) {
 }
 
 float computeHeight(vec3 p) {
-    float distortion = 2.*uDistortionSize;
-    float flatD = length(flatLookDirDistance(position.xz));
-    float d = 1. - max(distortion - flatD*flatD, 0.)/distortion;
+    //float distortion = 2.*uDistortionSize;
+    //float flatD = length(flatLookDirDistance(p.xz));
+    //float d = 1. - max(distortion - flatD*flatD, 0.)/distortion;
+    float d = 1.;
     float amplitude = 0.65*d;
-    return amplitude*noise(2.5*vec3(p.x, 0., p.z + uTime*0.15));
+    return amplitude*noise(2.5*vec3(p.x + uTime*0.15, 0., p.z));
 }
 
 float computeBillowing(vec3 position) {
@@ -95,7 +98,8 @@ void main() {
     vColor = vec4( color, opacity );
     vUV = uv;
 
-    vec3 actualPosition = position + vec3(0., computeHeight(position), 0.);
+    vec4 texturePosition = texture2D(uTexture, vec2(0.5 + position.z/(2.*uBoundZ), 0.5 + position.x/(2.*uBoundX)));
+    vec3 actualPosition = texturePosition.zyx - vec3(0.5) + vec3(0., computeHeight(texturePosition.xyz), 0.);
     actualPosition.x = actualPosition.x + computeBillowing(actualPosition.xyz);
 
     vPosition = actualPosition;

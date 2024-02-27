@@ -60,6 +60,14 @@ export class Sketch {
         type: "f",
         value: 0.5,
       },
+      uBoundX: {
+        type: "f",
+        value: 2.
+      },
+      uBoundZ: {
+        type: "f",
+        value: 2.
+      },
       uTexture: {
         value: null
       }

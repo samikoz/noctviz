@@ -1,16 +1,15 @@
 import * as THREE from "three";
 import {MeshLineGeometry} from "meshline";
-import noiseVertex from "./shader/noiseVertex.glsl";
-import noiseFragment from "./shader/noiseFragment.glsl";
+import fboVertex from "./shader/fboVertex.glsl";
+import fboFragment from "./shader/fboFragment.glsl";
 import vertexLine from "./shader/vertexLine.glsl";
 import fragmentLine from "./shader/fragmentLine.glsl";
 
 export default class SyntheticMountains {
-    modelXRange = [-2, 2];
-    modelZRange = [-2, 2];
-    lineCount = 100;
-    lineColorCount = 6;
-    lineSampleCount = 300;
+    xBound = 2;
+    zBound = 2;
+    lineCount = 128;
+    lineSampleCount = 512;
 
     constructor(container) {
         this.container = container;
@@ -24,13 +23,40 @@ export default class SyntheticMountains {
         this.fboCamera.position.set(0, 0, 1);
         this.fboCamera.lookAt(0, 0, 0);
 
+        this.data = new Float32Array(this.lineSampleCount*this.lineSampleCount*4);
+        for (let pointAlongIndex = 0; pointAlongIndex < this.lineSampleCount; pointAlongIndex++) {
+            for (let lineIndex = 1; lineIndex < this.lineCount; lineIndex++) {
+                let index = (pointAlongIndex + 4*lineIndex * this.lineSampleCount)*4;
+                this.data[index + 0] = this.getStepFromRange(pointAlongIndex, this.lineSampleCount, this.xBound);
+                this.data[index + 1] = 0.
+                this.data[index + 2] = this.getStepFromRange(lineIndex, this.lineCount, this.zBound);
+                this.data[index + 3] = 1.;
+
+                this.data[index - 4*this.lineSampleCount + 0] = this.getStepFromRange(pointAlongIndex, this.lineSampleCount, this.xBound);
+                this.data[index - 4*this.lineSampleCount + 1] = 0.;
+                this.data[index - 4*this.lineSampleCount + 2] = this.getStepFromRange(lineIndex, this.lineCount, this.zBound);
+                this.data[index - 4*this.lineSampleCount + 3] = 1.;
+
+                this.data[index + 4*this.lineSampleCount + 0] = this.getStepFromRange(pointAlongIndex, this.lineSampleCount, this.xBound);
+                this.data[index + 4*this.lineSampleCount + 1] = 0.
+                this.data[index + 4*this.lineSampleCount + 2] = this.getStepFromRange(lineIndex, this.lineCount, this.zBound);
+                this.data[index + 4*this.lineSampleCount + 3] = 1.;
+            }
+        }
+
+        this.fboTexture = new THREE.DataTexture(this.data, this.lineSampleCount, this.lineSampleCount, THREE.RGBAFormat, THREE.FloatType);
+        this.fboTexture.magFilter = THREE.NearestFilter;
+        this.fboTexture.minFilter = THREE.NearestFilter;
+        this.fboTexture.needsUpdate = true;
+
         let geometry = new THREE.PlaneGeometry(2, 2);
         this.fboMaterial = new THREE.ShaderMaterial({
             uniforms: {
                 uTime: {value: 0},
+                uPositions: {value: this.fboTexture},
             },
-            vertexShader: noiseVertex,
-            fragmentShader: noiseFragment,
+            vertexShader: fboVertex,
+            fragmentShader: fboFragment,
         });
 
         this.fboMesh = new THREE.Mesh(geometry, this.fboMaterial);
@@ -49,8 +75,8 @@ export default class SyntheticMountains {
     getLines(lineMaterial) {
         let lines = []
         for (let i = 1; i < this.lineCount; i++) {
-            let tubeXPosition = this.modelXRange[0] + i/this.lineCount*(this.modelXRange[1]-this.modelXRange[0]);
-            lines.push(this.getLineAt(tubeXPosition, lineMaterial));
+            let lineXPosition = this.getStepFromRange(i, this.lineCount, this.xBound);
+            lines.push(this.getLineAt(lineXPosition, lineMaterial));
         }
         return lines;
     }
@@ -58,7 +84,7 @@ export default class SyntheticMountains {
     getLineAt(x, lineMaterial) {
         let linePoints = [];
         for (let i = 0; i < this.lineSampleCount; i++) {
-            let zPosition = this.modelZRange[0] + i/this.lineSampleCount*(this.modelZRange[1]-this.modelZRange[0]);
+            let zPosition = this.getStepFromRange(i, this.lineSampleCount, this.zBound);
             linePoints.push(new THREE.Vector3(x, 0, zPosition));
         }
 
@@ -67,13 +93,15 @@ export default class SyntheticMountains {
         return new THREE.Mesh(geometry, lineMaterial);
     }
 
+    getStepFromRange(step, totalSteps, bound) {
+        return -bound + (step/totalSteps)*(2*bound);
+    }
+
     renderTexture(renderer) {
-        /*
         renderer.setRenderTarget(this.fbo);
         renderer.render(this.fboScene, this.fboCamera);
 
         return this.fbo.texture;
-         */
     }
 
     getLineVertexShader() {
