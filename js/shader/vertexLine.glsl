@@ -101,12 +101,18 @@ void main() {
     vec4 texturePosition = texture2D(uTexture, vec2(0.5 + position.z/(2.*uBoundZ), 0.5 + position.x/(2.*uBoundX)));
     vec3 actualPosition = texturePosition.zyx - vec3(0.5) + vec3(0., computeHeight(texturePosition.xyz), 0.);
     actualPosition.x = actualPosition.x + computeBillowing(actualPosition.xyz);
+    vec4 texturePrevious = texture2D(uTexture, vec2(0.5 + previous.z/(2.*uBoundZ), 0.5 + previous.x/(2.*uBoundX)));
+    vec3 previousPosition = texturePrevious.zyx - vec3(0.5) + vec3(0., computeHeight(texturePrevious.xyz), 0.);
+    previousPosition.x = previousPosition.x + computeBillowing(previousPosition.xyz);
+    vec4 textureNext = texture2D(uTexture, vec2(0.5 + next.z/(2.*uBoundZ), 0.5 + next.x/(2.*uBoundX)));
+    vec3 nextPosition = textureNext.zyx - vec3(0.5) + vec3(0., computeHeight(textureNext.xyz), 0.);
+    nextPosition.x = nextPosition.x + computeBillowing(nextPosition.xyz);
 
     vPosition = actualPosition;
 
     vec4 worldPosition = (modelMatrix * vec4(actualPosition, 1.0));
-    vec4 prevWorldPosition = (modelMatrix * vec4(previous, 1.0));
-    vec4 nextWorldPosition = (modelMatrix * vec4(next, 1.0));
+    vec4 prevWorldPosition = (modelMatrix * vec4(previousPosition, 1.0));
+    vec4 nextWorldPosition = (modelMatrix * vec4(nextPosition, 1.0));
 
 
     mat4 m = projectionMatrix * viewMatrix;

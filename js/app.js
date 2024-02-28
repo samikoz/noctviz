@@ -81,7 +81,7 @@ export class Sketch {
   }
 
   getLineMaterial() {
-    let material = new MeshLineMaterial({ lineWidth: 0.002});
+    let material = new MeshLineMaterial({ resolution: new THREE.Vector2(this.width, this.height), lineWidth: 0.002});
     let vShader = this.mountains.getLineVertexShader();
     if (vShader !== undefined) {
       material.vertexShader = vShader;
