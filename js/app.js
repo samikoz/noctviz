@@ -3,12 +3,14 @@ import { MeshLineMaterial } from 'meshline'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 
 import SyntheticMountains from "./mountains";
+import {BaseSceneSetup, RightSideSceneSetup} from "./sceneControls";
 
 export class Sketch {
   timedelta = 0.05;
 
-  constructor(options, mountains) {
+  constructor(options, setup, mountains) {
     this.scene = new THREE.Scene();
+    this.setup = setup;
     this.mountains = mountains;
 
     this.container = options.dom;
@@ -29,10 +31,12 @@ export class Sketch {
         1000
     );
 
-    this.camera.position.set(0, 0, 4);
+    this.camera.position.set(0, 0, -4);
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.setup.setControls(this.camera, this.controls);
     this.caster = new THREE.Raycaster();
 
+    this.setup.setFboShaders(this.mountains);
     this.mountains.setupFBO(this.renderer);
 
     this.isPlaying = true;
@@ -117,7 +121,6 @@ export class Sketch {
   render() {
     if (!this.isPlaying) return;
     this.uniforms.uTime.value += this.timedelta;
-    this.mountains.advanceTime(this.timedelta);
 
     requestAnimationFrame(this.render.bind(this));
 
@@ -128,8 +131,9 @@ export class Sketch {
 }
 
 let container = document.getElementById("container");
+let setup = new RightSideSceneSetup();
 let mountains = new SyntheticMountains(container);
-let sketch = new Sketch({dom: container}, mountains);
+let sketch = new Sketch({dom: container}, setup, mountains);
 
 document.onmousemove = function(e) {
   let mousePositionX = (e.pageX / sketch.width) * 2 - 1;
@@ -139,3 +143,10 @@ document.onmousemove = function(e) {
   sketch.uniforms.uLookDirection.value = sketch.caster.ray.direction;
   sketch.uniforms.uEyePosition.value = sketch.caster.ray.origin;
 }
+
+sketch.controls.addEventListener("change", event => {
+  let target = sketch.controls.target;
+  let position = sketch.controls.object.position;
+  console.log("target ", target.x,",",target.y,",",target.z);
+  console.log("position ", position.x,",",position.y,",",position.z);
+})

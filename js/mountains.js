@@ -13,6 +13,9 @@ export default class SyntheticMountains {
 
     constructor(container) {
         this.container = container;
+
+        this.staticFbo = true;
+        this.fboFragmentShader = fboFragment;
     }
 
     setupFBO(renderer) {
@@ -55,9 +58,11 @@ export default class SyntheticMountains {
             uniforms: {
                 uTime: {value: 0},
                 uPositions: {value: this.fboTexture},
+                uBoundX: {type: "f", value: this.xBound},
+                uBoundZ: {type: "f", value: this.zBound},
             },
             vertexShader: fboVertex,
-            fragmentShader: fboFragment,
+            fragmentShader: this.fboFragmentShader,
         });
 
         this.fboMesh = new THREE.Mesh(geometry, this.fboMaterial);
@@ -107,11 +112,13 @@ export default class SyntheticMountains {
         renderer.setRenderTarget(this.fboTarget);
         renderer.render(this.fboScene, this.fboCamera);
 
-        this.fboMaterial.uniforms.uPositions.value = this.fboTarget.texture;
-
         let currentTarget = this.fboTarget;
-        this.fboTarget = this.fboTarget2;
-        this.fboTarget2 = currentTarget;
+        if (!this.staticFbo) {
+            this.fboMaterial.uniforms.uPositions.value = this.fboTarget.texture;
+
+            this.fboTarget = this.fboTarget2;
+            this.fboTarget2 = currentTarget;
+        }
 
         return currentTarget.texture;
     }
@@ -122,9 +129,5 @@ export default class SyntheticMountains {
 
     getLineFragmentShader() {
         return fragmentLine;
-    }
-
-    advanceTime(delta) {
-        this.fboMaterial.uniforms.uTime.value += delta;
     }
 }
