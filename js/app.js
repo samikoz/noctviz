@@ -10,7 +10,6 @@ export class Sketch {
   constructor(options, mountains) {
     this.scene = new THREE.Scene();
     this.mountains = mountains;
-    this.mountains.setupFBO();
 
     this.container = options.dom;
     this.width = this.container.offsetWidth;
@@ -33,6 +32,8 @@ export class Sketch {
     this.camera.position.set(0, 0, 4);
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.caster = new THREE.Raycaster();
+
+    this.mountains.setupFBO(this.renderer);
 
     this.isPlaying = true;
     this.uniforms = {

@@ -15,8 +15,9 @@ export default class SyntheticMountains {
         this.container = container;
     }
 
-    setupFBO() {
-        this.fbo = this.getRenderTarget();
+    setupFBO(renderer) {
+        this.fboTarget = this.getRenderTarget();
+        this.fboTarget2 = this.getRenderTarget();
 
         this.fboScene = new THREE.Scene();
         this.fboCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, -1, 1);
@@ -61,6 +62,11 @@ export default class SyntheticMountains {
 
         this.fboMesh = new THREE.Mesh(geometry, this.fboMaterial);
         this.fboScene.add(this.fboMesh);
+
+        renderer.setRenderTarget(this.fboTarget);
+        renderer.render(this.fboScene, this.fboCamera);
+        renderer.setRenderTarget(this.fboTarget2);
+        renderer.render(this.fboScene, this.fboCamera);
     }
 
     getRenderTarget() {
@@ -98,10 +104,16 @@ export default class SyntheticMountains {
     }
 
     renderTexture(renderer) {
-        renderer.setRenderTarget(this.fbo);
+        renderer.setRenderTarget(this.fboTarget);
         renderer.render(this.fboScene, this.fboCamera);
 
-        return this.fbo.texture;
+        this.fboMaterial.uniforms.uPositions.value = this.fboTarget.texture;
+
+        let currentTarget = this.fboTarget;
+        this.fboTarget = this.fboTarget2;
+        this.fboTarget2 = currentTarget;
+
+        return currentTarget.texture;
     }
 
     getLineVertexShader() {
