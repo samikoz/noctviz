@@ -6,10 +6,10 @@ import vertexLine from "./shader/vertexLine.glsl";
 import fragmentLine from "./shader/fragmentLine.glsl";
 
 export default class SyntheticMountains {
-    xBound = 2;
-    zBound = 2;
-    lineCount = 128;
-    lineSampleCount = 512;
+    xBound = 4;
+    zBound = 4;
+    lineCount = 256;
+    lineSampleCount = 1024;
 
     constructor(container) {
         this.container = container;
@@ -45,6 +45,7 @@ export default class SyntheticMountains {
                 this.data[index + 4*this.lineSampleCount + 1] = 0.
                 this.data[index + 4*this.lineSampleCount + 2] = this.getStepFromRange(lineIndex, this.lineCount, this.zBound);
                 this.data[index + 4*this.lineSampleCount + 3] = 1.;
+
             }
         }
 

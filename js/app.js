@@ -3,7 +3,7 @@ import { MeshLineMaterial } from 'meshline'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 
 import SyntheticMountains from "./mountains";
-import {BaseSceneSetup, RightSideSceneSetup} from "./sceneControls";
+import {BaseSceneSetup, RightSideSceneSetup, ZoomingOutSetup} from "./sceneControls";
 
 export class Sketch {
   timedelta = 0.05;
@@ -67,11 +67,11 @@ export class Sketch {
       },
       uBoundX: {
         type: "f",
-        value: 2.
+        value: this.mountains.xBound
       },
       uBoundZ: {
         type: "f",
-        value: 2.
+        value: this.mountains.zBound
       },
       uTexture: {
         value: null
@@ -121,6 +121,7 @@ export class Sketch {
   render() {
     if (!this.isPlaying) return;
     this.uniforms.uTime.value += this.timedelta;
+    this.setup.updateControls(this.uniforms.uTime.value, this.camera, this.controls);
 
     requestAnimationFrame(this.render.bind(this));
 
@@ -131,7 +132,7 @@ export class Sketch {
 }
 
 let container = document.getElementById("container");
-let setup = new RightSideSceneSetup();
+let setup = new ZoomingOutSetup();
 let mountains = new SyntheticMountains(container);
 let sketch = new Sketch({dom: container}, setup, mountains);
 
@@ -150,3 +151,4 @@ sketch.controls.addEventListener("change", event => {
   console.log("target ", target.x,",",target.y,",",target.z);
   console.log("position ", position.x,",",position.y,",",position.z);
 })
+
