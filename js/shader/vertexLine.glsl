@@ -24,7 +24,7 @@ uniform float sizeAttenuation;
 uniform vec3 uLookDirection;
 uniform vec3 uEyePosition;
 uniform float uDistortionSize;
-uniform sampler2D uTexture;
+uniform sampler2D uPositions;
 uniform float uTime;
 uniform float uBoundX;
 uniform float uBoundZ;
@@ -89,7 +89,7 @@ float mouseHeightDrop(vec3 p) {
 }
 
 vec3 getActualPosition(vec3 p) {
-    vec4 texturePosition = texture2D(uTexture, vec2(0.5 + p.z/(2.*uBoundZ), 0.5 + p.x/(2.*uBoundX)));
+    vec4 texturePosition = texture2D(uPositions, vec2(0.5 + p.z/(2.*uBoundZ), 0.5 + p.x/(2.*uBoundX)));
     vec3 actualPosition = texturePosition.zyx - vec3(0.5) + vec3(0., computeHeight(texturePosition.xyz), 0.);
     actualPosition.x = actualPosition.x + computeBillowing(actualPosition.xyz);
     actualPosition.y = actualPosition.y - mouseHeightDrop(actualPosition);
@@ -101,12 +101,13 @@ void main() {
 
     vColor = vec4( color, opacity );
     vUV = uv;
+    vPosition = position;
 
+    //--Panchgani changes
     vec3 actualPosition = getActualPosition(position);
     vec3 previousPosition = getActualPosition(previous);
     vec3 nextPosition = getActualPosition(next);
-
-    vPosition = actualPosition;
+    //--
 
     vec4 worldPosition = (modelMatrix * vec4(actualPosition, 1.0));
     vec4 prevWorldPosition = (modelMatrix * vec4(previousPosition, 1.0));

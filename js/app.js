@@ -6,6 +6,10 @@ import SyntheticMountains from "./mountains";
 import {BaseSceneSetup, RightSideSceneSetup, ZoomingOutSetup} from "./sceneControls";
 
 export class Sketch {
+  distortionSize= 0.2;
+  amplitude = 0.65;
+  lineSpeed = 0.5;
+
   timedelta = 0.05;
 
   constructor(options, setup, mountains) {
@@ -33,6 +37,7 @@ export class Sketch {
 
     this.camera.position.set(0, 0, -4);
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controls.enabled = false;
     this.setup.setControls(this.camera, this.controls);
     this.caster = new THREE.Raycaster();
 
@@ -59,11 +64,11 @@ export class Sketch {
       },
       uDistortionSize: {
         type: "f",
-        value: 0.2,
+        value: this.distortionSize,
       },
       uLineSpeed: {
         type: "f",
-        value: 0.5,
+        value: this.lineSpeed,
       },
       uBoundX: {
         type: "f",
@@ -75,9 +80,9 @@ export class Sketch {
       },
       uAmplitude: {
         type: "f",
-        value: 0.65
+        value: this.amplitude
       },
-      uTexture: {
+      uPositions: {
         value: null
       }
     };
@@ -129,7 +134,7 @@ export class Sketch {
 
     requestAnimationFrame(this.render.bind(this));
 
-    this.uniforms.uTexture.value = this.mountains.renderTexture(this.renderer);
+    this.uniforms.uPositions.value = this.mountains.renderTexture(this.renderer);
     this.renderer.setRenderTarget(null);
     this.renderer.render(this.scene, this.camera);
   }
@@ -159,12 +164,13 @@ document.onkeyup = function (e) {
   }
 }
 
+/*
 sketch.controls.addEventListener("change", event => {
   let target = sketch.controls.target;
   let position = sketch.controls.object.position;
   let up = sketch.camera.up;
-  console.log("target ", target.x, ",", target.y, ",", target.z);
-  console.log("position ", position.x, ",", position.y, ",", position.z);
-  console.log("up ", up.x, ",", up.y, ",", up.z);
+  console.log("look direction:", target.x, ",", target.y, ",", target.z);
+  console.log("camera position:", position.x, ",", position.y, ",", position.z);
+  console.log("camera up direction:", up.x, ",", up.y, ",", up.z);
 });
-
+*/

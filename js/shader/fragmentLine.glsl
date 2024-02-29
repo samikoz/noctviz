@@ -25,7 +25,7 @@ uniform float visibility;
 uniform float alphaTest;
 uniform vec2 repeat;
 uniform float uTime;
-uniform sampler2D uTexture;
+uniform sampler2D uPositions;
 uniform float uLineSpeed;
 
 varying vec2 vUV;
@@ -54,9 +54,11 @@ void main() {
         gl_FragDepthEXT = vIsPerspective == 0.0 ? gl_FragCoord.z : log2(vFragDepth) * logDepthBufFC * 0.5;
     #endif
 
+    //--Panchgani changes
     //vec4 c = vColor;
     float phase = vPosition.z - uLineSpeed*uTime;
     vec4 c = vec4(noctColors[(int(round(20.*vPosition.x)) + int(phase/PI)) % 6], 1);
+    //--
 
     if (useMap == 1.) c *= texture2D(map, vUV * repeat);
     if (useAlphaMap == 1.) c.a *= texture2D(alphaMap, vUV * repeat).a;
