@@ -32,8 +32,8 @@ export class RightSideSceneSetup extends BaseSceneSetup {
     constructor() {
         super();
 
-        this.cameraPosition = new THREE.Vector3(-4.0564033279995595 , 0.4543180280194068 , -2.2304586820257173)
-        this.controlsTarget = new THREE.Vector3(-0.2717350996148814 , -1.2742815564990029 , -0.23611459712338626);
+        this.cameraPosition = new THREE.Vector3( -4.155761644360708 , 0.34711730727755596 , -1.9568252322593092)
+        this.controlsTarget = new THREE.Vector3(-0.43795928204754814 , -1.5284463549729108 , -0.14096841927102127);
         this.staticFbo = true;
         this.fboFragmentShader = fboFragment;
     }

@@ -129,6 +129,5 @@ export default class SyntheticMountains {
     }
 
     getLineFragmentShader() {
-        return fragmentLine;
     }
 }
