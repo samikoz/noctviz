@@ -28,6 +28,7 @@ uniform sampler2D uTexture;
 uniform float uTime;
 uniform float uBoundX;
 uniform float uBoundZ;
+uniform float uAmplitude;
 
 varying vec2 vUV;
 varying vec4 vColor;
@@ -79,8 +80,7 @@ vec2 flatLookDirDistance(vec2 p) {
 }
 
 float computeHeight(vec3 p) {
-    float amplitude = 0.65;
-    return amplitude*noise(2.5*vec3(p.x + uTime*0.15, 0., p.z));
+    return uAmplitude*noise(2.5*vec3(p.x + uTime*0.15, 0., p.z));
 }
 
 float computeBillowing(vec3 position) {

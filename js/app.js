@@ -73,6 +73,10 @@ export class Sketch {
         type: "f",
         value: this.mountains.zBound
       },
+      uAmplitude: {
+        type: "f",
+        value: 0.65
+      },
       uTexture: {
         value: null
       }
@@ -147,19 +151,20 @@ document.onmousemove = function(e) {
 
 document.onkeyup = function (e) {
   if (e.key === "n") {
-    sketch.setup = new RightSideSceneSetup(sketch.uniforms.uTime.value);
+    sketch.setup = new RightSideSceneSetup(sketch.uniforms.uTime.value, sketch.uniforms.uAmplitude);
     sketch.setup.setControls(sketch.camera, sketch.controls);
   }
+  if (e.key === "m") {
+    sketch.uniforms.uAmplitude.value += 0.1;
+  }
 }
-/*
+
 sketch.controls.addEventListener("change", event => {
   let target = sketch.controls.target;
   let position = sketch.controls.object.position;
   let up = sketch.camera.up;
-  console.log("target ", target.x,",",target.y,",",target.z);
-  console.log("position ", position.x,",",position.y,",",position.z);
-  console.log("up ", up.x,",",up.y,",",up.z);
-})
-
- */
+  console.log("target ", target.x, ",", target.y, ",", target.z);
+  console.log("position ", position.x, ",", position.y, ",", position.z);
+  console.log("up ", up.x, ",", up.y, ",", up.z);
+});
 

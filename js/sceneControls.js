@@ -50,15 +50,17 @@ export class ZoomingOutSetup extends BaseSceneSetup {
 }
 
 export class RightSideSceneSetup extends ZoomingOutSetup {
-    constructor(initialTime) {
+    constructor(initialTime, amplitude) {
         super();
         this.initialTime = initialTime;
+        this.amplitude = amplitude;
+        this.initialAmplitudeValue = amplitude.value;
 
         this.cameraPosition.z = this.finalcameraZPosition;
         this.fboFragmentShader = fboFragment;
 
-        this.finalControlsTarget = new THREE.Vector3(  1.8013166784734456 , 0.8493887690645442 , -2.1804190699321095 );
-        this.finalcameraPosition = new THREE.Vector3(1.3360126802716596 , 1.0722842287795855 , -2.3532044169400095);
+        this.finalControlsTarget = new THREE.Vector3(  2.12825720872404 , 0.9755629790830657 , -2.8980687256305195);
+        this.finalCameraPosition = new THREE.Vector3(1.662953787798751 , 1.198458162264248 , -3.0708595826290335);
         this.finalUpPosition = new THREE.Vector3(0.12895533823797742 , 0.9688434461390165 , 0.31145424472778138);
     }
 
@@ -67,9 +69,9 @@ export class RightSideSceneSetup extends ZoomingOutSetup {
         let offsetTime = time - this.initialTime;
         if (offsetTime < zoomDuration) {
             let smoothTime = THREE.MathUtils.smootherstep(offsetTime, 0, zoomDuration);
-            let zCameraPosition = this.cameraPosition.z * (1-smoothTime)  + this.finalcameraPosition.z * smoothTime;
-            let yCameraPosition = this.cameraPosition.y * (1-smoothTime)  + this.finalcameraPosition.y * smoothTime;
-            let xCameraPosition = this.cameraPosition.x * (1-smoothTime)  + this.finalcameraPosition.x * smoothTime;
+            let zCameraPosition = this.cameraPosition.z * (1-smoothTime)  + this.finalCameraPosition.z * smoothTime;
+            let yCameraPosition = this.cameraPosition.y * (1-smoothTime)  + this.finalCameraPosition.y * smoothTime;
+            let xCameraPosition = this.cameraPosition.x * (1-smoothTime)  + this.finalCameraPosition.x * smoothTime;
 
             let zTargetPosition = this.controlsTarget.z * (1-smoothTime)  + this.finalControlsTarget.z * smoothTime;
             let yTargetPosition = this.controlsTarget.y * (1-smoothTime)  + this.finalControlsTarget.y * smoothTime;
@@ -82,6 +84,8 @@ export class RightSideSceneSetup extends ZoomingOutSetup {
             camera.up.set(xUpPosition, yUpPosition, zUpPosition);
             controls.target.set(xTargetPosition, yTargetPosition, zTargetPosition);
             controls.update();
+
+            this.amplitude.value = this.initialAmplitudeValue * (1 - smoothTime) + 0.2 * smoothTime;
         }
     }
 }
