@@ -132,7 +132,7 @@ export class Sketch {
 }
 
 let container = document.getElementById("container");
-let setup = new ZoomingOutSetup();
+let setup = new RightSideSceneSetup();
 let mountains = new SyntheticMountains(container);
 let sketch = new Sketch({dom: container}, setup, mountains);
 

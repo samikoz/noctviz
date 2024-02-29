@@ -79,11 +79,7 @@ vec2 flatLookDirDistance(vec2 p) {
 }
 
 float computeHeight(vec3 p) {
-    //float distortion = 2.*uDistortionSize;
-    //float flatD = length(flatLookDirDistance(p.xz));
-    //float d = 1. - max(distortion - flatD*flatD, 0.)/distortion;
-    float d = 1.;
-    float amplitude = 0.65*d;
+    float amplitude = 0.65*p.x;
     return amplitude*noise(2.5*vec3(p.x + uTime*0.15, 0., p.z));
 }
 

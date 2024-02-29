@@ -14,6 +14,7 @@ export class BaseSceneSetup {
     setControls(camera, controls) {
         camera.position.set(this.cameraPosition.x, this.cameraPosition.y, this.cameraPosition.z);
         controls.target.set(this.controlsTarget.x, this.controlsTarget.y, this.controlsTarget.z);
+        controls.update();
     }
 
     setFboShaders(mountains) {
@@ -31,10 +32,10 @@ export class RightSideSceneSetup extends BaseSceneSetup {
     constructor() {
         super();
 
-        this.cameraPosition = new THREE.Vector3(1.830401043339714, -0.1632315365325554, -2.3851403121342822)
-        this.controlsTarget = new THREE.Vector3(1.8174435844439023, -0.12865413165305759,0);
+        this.cameraPosition = new THREE.Vector3(-4.0564033279995595 , 0.4543180280194068 , -2.2304586820257173)
+        this.controlsTarget = new THREE.Vector3(-0.2717350996148814 , -1.2742815564990029 , -0.23611459712338626);
         this.staticFbo = true;
-        this.fboFragmentShader = fboRightSide;
+        this.fboFragmentShader = fboFragment;
     }
 }
 
