@@ -59,9 +59,10 @@ export class RightSideSceneSetup extends ZoomingOutSetup {
         this.cameraPosition.z = this.finalcameraZPosition;
         this.fboFragmentShader = fboFragment;
 
-        this.finalControlsTarget = new THREE.Vector3(  2.12825720872404 , 0.9755629790830657 , -2.8980687256305195);
-        this.finalCameraPosition = new THREE.Vector3(1.662953787798751 , 1.198458162264248 , -3.0708595826290335);
+        this.finalControlsTarget = new THREE.Vector3(  4.144632093888078 , 0.009658386424057334 , -2.149267653066033);
+        this.finalCameraPosition = new THREE.Vector3(3.3178048840216308 , 0.6746253381988925 , -2.450103520752379);
         this.finalUpPosition = new THREE.Vector3(0.12895533823797742 , 0.9688434461390165 , 0.31145424472778138);
+
     }
 
     updateControls(time, camera, controls) {

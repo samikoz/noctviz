@@ -37,12 +37,12 @@ export class Sketch {
 
     this.camera.position.set(0, 0, -4);
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    this.controls.enabled = false;
+    //this.controls.enabled = false;
     this.setup.setControls(this.camera, this.controls);
     this.caster = new THREE.Raycaster();
 
     this.setup.setFboShaders(this.mountains);
-    this.mountains.setupFBO(this.renderer);
+    //this.mountains.setupFBO(this.renderer);
 
     this.isPlaying = true;
     this.uniforms = {
@@ -134,7 +134,7 @@ export class Sketch {
 
     requestAnimationFrame(this.render.bind(this));
 
-    this.uniforms.uPositions.value = this.mountains.renderTexture(this.renderer);
+    //this.uniforms.uPositions.value = this.mountains.renderTexture(this.renderer);
     this.renderer.setRenderTarget(null);
     this.renderer.render(this.scene, this.camera);
   }
@@ -164,7 +164,6 @@ document.onkeyup = function (e) {
   }
 }
 
-/*
 sketch.controls.addEventListener("change", event => {
   let target = sketch.controls.target;
   let position = sketch.controls.object.position;
@@ -173,4 +172,3 @@ sketch.controls.addEventListener("change", event => {
   console.log("camera position:", position.x, ",", position.y, ",", position.z);
   console.log("camera up direction:", up.x, ",", up.y, ",", up.z);
 });
-*/

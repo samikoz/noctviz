@@ -89,8 +89,9 @@ float mouseHeightDrop(vec3 p) {
 }
 
 vec3 getActualPosition(vec3 p) {
-    vec4 texturePosition = texture2D(uPositions, vec2(0.5 + p.z/(2.*uBoundZ), 0.5 + p.x/(2.*uBoundX)));
-    vec3 actualPosition = texturePosition.zyx - vec3(0.5) + vec3(0., computeHeight(texturePosition.xyz), 0.);
+    //vec4 texturePosition = texture2D(uPositions, vec2(0.5 + p.z/(2.*uBoundZ), 0.5 + p.x/(2.*uBoundX)));
+    //vec3 actualPosition = texturePosition.zyx - vec3(0.5) + vec3(0., computeHeight(texturePosition.xyz), 0.);
+    vec3 actualPosition = p.xyz - vec3(0.5) +  vec3(0., computeHeight(p.zyx), 0.);
     actualPosition.x = actualPosition.x + computeBillowing(actualPosition.xyz);
     actualPosition.y = actualPosition.y - mouseHeightDrop(actualPosition);
     return actualPosition;

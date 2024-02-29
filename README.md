@@ -1,6 +1,7 @@
 # Panchgani Hills
 Interactive animation made during workaway for [NOCT](https://noct.in/) [design studio](https://www.instagram.com/noctindia/)
-in Feb 2024.
+in Feb 2024. Wouldn't come to existence without [Yuri Artiukh's](https://www.youtube.com/channel/UCDo7RTzizoOdPjY8A-xDR7g)
+wonderful tutorials.
 
 Developed on Node.js v21.6.2.
 
@@ -50,6 +51,8 @@ with some changes marked by the comments.
 Colors are decided in the `fragmentLine` shader. It contains hardcoded colors, assigns them to
 the lines are changes them with `lineSpeed` from `app.js`. Only the lines marked by the comments
 contain the Panchgani-code - the rest is original shader code from `MeshLineMaterial`.
+
+## Events
 
 ## FBO
 `SyntheticMountains` class encodes the line points positions in a texture in `setupFBO()`, rendering it
