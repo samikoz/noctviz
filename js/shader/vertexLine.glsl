@@ -69,14 +69,10 @@ float noise(vec3 p){
     return o4.y * d.y + o4.x * (1.0 - d.y);
 }
 
-vec3 lookDirDistance(vec3 p) {
+float mouseDistortion(float distortionSize, vec3 p) {
     float lambda = (dot(p, uLookDirection) - dot(uEyePosition, uLookDirection))/dot(uLookDirection, uLookDirection);
-    return p - (uEyePosition + uLookDirection*lambda);
-}
-
-vec2 flatLookDirDistance(vec2 p) {
-    float lambda = (dot(p, uLookDirection.xz) - dot(uEyePosition.xz, uLookDirection.xz))/dot(uLookDirection.xz, uLookDirection.xz);
-    return p - (uEyePosition.xz + uLookDirection.xz*lambda);
+    float lookDirDistance = length(p - (uEyePosition + uLookDirection*lambda));
+    return max(distortionSize - lookDirDistance, 0.);
 }
 
 float computeHeight(vec3 p) {
@@ -84,8 +80,20 @@ float computeHeight(vec3 p) {
 }
 
 float computeBillowing(vec3 position) {
-    float mouseContrib = 20.*max(uDistortionSize - length(lookDirDistance(position)), 0.);
-    return 0.1*noise(vec3(position.x + uTime*0.1, 0., 10.*position.z + mouseContrib + uTime*0.1));
+    float mouseContrib = 20.*mouseDistortion(uDistortionSize, position);
+    return 0.1*noise(vec3(position.x + uTime*0.1, 0., 10.*position.z + mouseContrib + uTime*(0.1+mouseContrib/50.)));
+}
+
+float mouseHeightDrop(vec3 p) {
+    return 0.6*uAmplitude*mouseDistortion(2.*uDistortionSize, p);
+}
+
+vec3 getActualPosition(vec3 p) {
+    vec4 texturePosition = texture2D(uTexture, vec2(0.5 + p.z/(2.*uBoundZ), 0.5 + p.x/(2.*uBoundX)));
+    vec3 actualPosition = texturePosition.zyx - vec3(0.5) + vec3(0., computeHeight(texturePosition.xyz), 0.);
+    actualPosition.x = actualPosition.x + computeBillowing(actualPosition.xyz);
+    actualPosition.y = actualPosition.y - mouseHeightDrop(actualPosition);
+    return actualPosition;
 }
 
 void main() {
@@ -94,15 +102,9 @@ void main() {
     vColor = vec4( color, opacity );
     vUV = uv;
 
-    vec4 texturePosition = texture2D(uTexture, vec2(0.5 + position.z/(2.*uBoundZ), 0.5 + position.x/(2.*uBoundX)));
-    vec3 actualPosition = texturePosition.zyx - vec3(0.5) + vec3(0., computeHeight(texturePosition.xyz), 0.);
-    actualPosition.x = actualPosition.x + computeBillowing(actualPosition.xyz);
-    vec4 texturePrevious = texture2D(uTexture, vec2(0.5 + previous.z/(2.*uBoundZ), 0.5 + previous.x/(2.*uBoundX)));
-    vec3 previousPosition = texturePrevious.zyx - vec3(0.5) + vec3(0., computeHeight(texturePrevious.xyz), 0.);
-    previousPosition.x = previousPosition.x + computeBillowing(previousPosition.xyz);
-    vec4 textureNext = texture2D(uTexture, vec2(0.5 + next.z/(2.*uBoundZ), 0.5 + next.x/(2.*uBoundX)));
-    vec3 nextPosition = textureNext.zyx - vec3(0.5) + vec3(0., computeHeight(textureNext.xyz), 0.);
-    nextPosition.x = nextPosition.x + computeBillowing(nextPosition.xyz);
+    vec3 actualPosition = getActualPosition(position);
+    vec3 previousPosition = getActualPosition(previous);
+    vec3 nextPosition = getActualPosition(next);
 
     vPosition = actualPosition;
 

@@ -59,7 +59,7 @@ export class Sketch {
       },
       uDistortionSize: {
         type: "f",
-        value: 0.1,
+        value: 0.2,
       },
       uLineSpeed: {
         type: "f",
