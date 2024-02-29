@@ -32,8 +32,8 @@ export class RightSideSceneSetup extends BaseSceneSetup {
     constructor() {
         super();
 
-        this.cameraPosition = new THREE.Vector3( -4.155761644360708 , 0.34711730727755596 , -1.9568252322593092)
-        this.controlsTarget = new THREE.Vector3(-0.43795928204754814 , -1.5284463549729108 , -0.14096841927102127);
+        this.cameraPosition = new THREE.Vector3( -6.4719038967808205 , 0.6643187322533091 , -2.2184466399154736);
+        this.controlsTarget = new THREE.Vector3(-0.3698513859458585 , -1.721758713941256 , -0.617765688585641);
         this.staticFbo = true;
         this.fboFragmentShader = fboFragment;
     }
@@ -60,5 +60,14 @@ export class ZoomingOutSetup extends BaseSceneSetup {
             let zPosition = this.cameraPosition.z * (1-smoothTime)  + this.finalcameraZPosition * smoothTime;
             camera.position.set(this.cameraPosition.x, this.cameraPosition.y, zPosition);
         }
+    }
+}
+
+export class MountainFromTop extends BaseSceneSetup {
+    constructor() {
+        super();
+
+        this.cameraPosition = new THREE.Vector3(-5.798987913112854 , 2.821853629707401 , 2.3056976943129923);
+        this.controlsTarget = new THREE.Vector3(-0.3698513859458585 , -1.721758713941256 , -0.617765688585641);
     }
 }

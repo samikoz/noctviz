@@ -3,11 +3,11 @@ import {MeshLineGeometry} from "meshline";
 import fboVertex from "./shader/fboVertex.glsl";
 import fboFragment from "./shader/fboFragment.glsl";
 import vertexLine from "./shader/vertexLine.glsl";
-import fragmentLine from "./shader/fragmentLine.glsl";
+import fragmentLine from "./shader/fragmentLine.glsl"
 
 export default class SyntheticMountains {
-    xBound = 4;
-    zBound = 4;
+    xBound = 6;
+    zBound = 6;
     lineCount = 256;
     lineSampleCount = 1024;
 
@@ -129,5 +129,6 @@ export default class SyntheticMountains {
     }
 
     getLineFragmentShader() {
+        return fragmentLine;
     }
 }

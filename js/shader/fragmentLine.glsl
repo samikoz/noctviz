@@ -27,6 +27,8 @@ uniform vec2 repeat;
 uniform float uTime;
 uniform sampler2D uTexture;
 uniform float uLineSpeed;
+uniform float uBoundZ;
+uniform float uBoundX;
 
 varying vec2 vUV;
 varying vec4 vColor;
@@ -41,6 +43,7 @@ void main() {
     #endif
 
     vec4 c = vColor;
+    c.a = 1.-max(vPosition.x, 0.)/uBoundX;
 
     if (useMap == 1.) c *= texture2D(map, vUV * repeat);
     if (useAlphaMap == 1.) c.a *= texture2D(alphaMap, vUV * repeat).a;
