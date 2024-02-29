@@ -79,7 +79,7 @@ vec2 flatLookDirDistance(vec2 p) {
 }
 
 float computeHeight(vec3 p) {
-    float amplitude = 0.65*p.x;
+    float amplitude = 0.65;
     return amplitude*noise(2.5*vec3(p.x + uTime*0.15, 0., p.z));
 }
 

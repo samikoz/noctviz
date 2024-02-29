@@ -132,7 +132,7 @@ export class Sketch {
 }
 
 let container = document.getElementById("container");
-let setup = new RightSideSceneSetup();
+let setup = new ZoomingOutSetup();
 let mountains = new SyntheticMountains(container);
 let sketch = new Sketch({dom: container}, setup, mountains);
 
@@ -145,10 +145,21 @@ document.onmousemove = function(e) {
   sketch.uniforms.uEyePosition.value = sketch.caster.ray.origin;
 }
 
+document.onkeyup = function (e) {
+  if (e.key === "n") {
+    sketch.setup = new RightSideSceneSetup(sketch.uniforms.uTime.value);
+    sketch.setup.setControls(sketch.camera, sketch.controls);
+  }
+}
+/*
 sketch.controls.addEventListener("change", event => {
   let target = sketch.controls.target;
   let position = sketch.controls.object.position;
+  let up = sketch.camera.up;
   console.log("target ", target.x,",",target.y,",",target.z);
   console.log("position ", position.x,",",position.y,",",position.z);
+  console.log("up ", up.x,",",up.y,",",up.z);
 })
+
+ */
 
