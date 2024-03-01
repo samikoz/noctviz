@@ -1,7 +1,6 @@
 import * as THREE from "three";
 
 import fboFragment from "./shader/fboFragment.glsl";
-import {Sketch} from "./app";
 
 export class BaseSceneSetup {
     constructor() {
@@ -30,14 +29,12 @@ export class BaseSceneSetup {
     }
 }
 
-export class ZoomingOutSetup extends BaseSceneSetup {
+export class InitialZoomOutSetup extends BaseSceneSetup {
     constructor() {
         super();
 
-
         this.cameraPosition = new THREE.Vector3(-0.01770809369550381 , 0.10034586427452115 , 0.6125304975561604);
         this.controlsTarget = new THREE.Vector3(-0.01770809369550389 , 0.10034586427452111 , 1.2827183834787967);
-        this.fboFragmentShader = fboFragment;
 
         this.finalcameraZPosition = -6.386848693734031;
     }
@@ -54,7 +51,7 @@ export class ZoomingOutSetup extends BaseSceneSetup {
     }
 }
 
-export class RightSideSceneSetup extends ZoomingOutSetup {
+export class HillFormingSetup extends InitialZoomOutSetup {
     constructor(uniforms) {
         super();
         this.initialTime = uniforms.uTime.value;
@@ -64,7 +61,6 @@ export class RightSideSceneSetup extends ZoomingOutSetup {
         this.initialAmplitudeValue = uniforms.uAmplitude.value;
 
         this.cameraPosition.z = this.finalcameraZPosition;
-        this.fboFragmentShader = fboFragment;
 
         this.finalCameraPosition = new THREE.Vector3(2.9907487284474836 , 0.4766877781622922 , -1.9034252255755764);
         this.finalControlsTarget = new THREE.Vector3(4.282531081582864 , 0.1098231390699022 , -1.6012324578800312);

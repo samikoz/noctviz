@@ -80,16 +80,19 @@ float mouseDistortion(float distortionSize, vec3 p) {
 }
 
 float computeHeight(vec3 p) {
+    float terrainDensity = 2.;
+    vec3 terrainRandomSeed = vec3(-1., 0., 7.);
     vec3 loneHillPosition = vec3(-0.5, 0., 4.3);
-    float loneHillHeight = uLoneHillHeight*(1. - smoothstep(0., uLoneHillSize, length(p - loneHillPosition)))*smoothstep(-0.05, 0., -uTimeSpeed);
+    float hillEmergenceFactor = -0.03;
+    float loneHillHeight = uLoneHillHeight*(1. - smoothstep(0., uLoneHillSize, length(p - loneHillPosition)))*smoothstep(hillEmergenceFactor, 0., -uTimeSpeed);
 
-    float noiz = noise(2.*vec3(-1. + p.x + uTime*uTimeSpeed, 0., 7. + p.z));
+    float noiz = noise(terrainDensity*(terrainRandomSeed + vec3(p.x + uTime*uTimeSpeed, 0., p.z)));
     return uAmplitude*noiz*noiz + loneHillHeight;
 }
 
 float computeBillowing(vec3 position) {
     float mouseContrib = 10.*mouseDistortion(uDistortionSize, position);
-    return 0.1*noise(vec3(position.x + uBillowTime*0.1, 0., 10.*position.z + mouseContrib + uTime*(0.1+mouseContrib/50.)));
+    return 0.1*noise(vec3(position.x + uBillowTime*0.1, 0., 10.*position.z + mouseContrib + uTime*0.1));
 }
 
 float mouseHeightDrop(vec3 p) {
@@ -97,6 +100,7 @@ float mouseHeightDrop(vec3 p) {
 }
 
 vec3 getActualPosition(vec3 p) {
+    //fbo
     //vec4 texturePosition = texture2D(uPositions, vec2(0.5 + p.z/(2.*uBoundZ), 0.5 + p.x/(2.*uBoundX)));
     //vec3 actualPosition = texturePosition.zyx - vec3(0.5) + vec3(0., computeHeight(texturePosition.xyz), 0.);
     vec3 actualPosition = p.xyz - vec3(0.5) +  vec3(0., computeHeight(p.zyx), 0.);

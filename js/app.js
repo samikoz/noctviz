@@ -3,7 +3,7 @@ import { MeshLineMaterial } from 'meshline'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 
 import SyntheticMountains from "./mountains";
-import {BaseSceneSetup, FormFilledSetup, RightSideSceneSetup, ZoomingOutSetup} from "./sceneControls";
+import {BaseSceneSetup, FormFilledSetup, HillFormingSetup, InitialZoomOutSetup} from "./sceneControls";
 
 export class Sketch {
   distortionSize= 0.2;
@@ -38,7 +38,7 @@ export class Sketch {
 
     this.camera.position.set(0, 0, -4);
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    //this.controls.enabled = false;
+    this.controls.enabled = false;
     this.setup.setControls(this.camera, this.controls);
     this.caster = new THREE.Raycaster();
 
@@ -157,9 +157,10 @@ export class Sketch {
 }
 
 let container = document.getElementById("container");
-let setup = new ZoomingOutSetup();
+let setup = new InitialZoomOutSetup();
 let mountains = new SyntheticMountains(container);
 let sketch = new Sketch({dom: container}, setup, mountains);
+
 
 document.onmousemove = function(e) {
   let mousePositionX = (e.pageX / sketch.width) * 2 - 1;
@@ -172,7 +173,7 @@ document.onmousemove = function(e) {
 
 document.onkeyup = function (e) {
   if (e.key === "n") {
-    sketch.setup = new RightSideSceneSetup(sketch.uniforms);
+    sketch.setup = new HillFormingSetup(sketch.uniforms);
     sketch.setup.setControls(sketch.camera, sketch.controls);
   }
   if (e.key === "m") {
