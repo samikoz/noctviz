@@ -6,7 +6,7 @@ import vertexLine from "./shader/vertexLine.glsl";
 import fragmentLine from "./shader/fragmentLine.glsl";
 
 export default class SyntheticMountains {
-    xBound = 5;
+    xBound = 6;
     zBound = 4;
     lineCount = 256;
     lineSampleCount = 1024;

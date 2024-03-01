@@ -76,7 +76,8 @@ float mouseDistortion(float distortionSize, vec3 p) {
 }
 
 float computeHeight(vec3 p) {
-    return uAmplitude*noise(2.5*vec3(p.x + uTime*0.15, 0., p.z));
+    float noiz = noise(2.*vec3(p.x + uTime*0.15, 0., 7. + p.z));
+    return uAmplitude*noiz*noiz;
 }
 
 float computeBillowing(vec3 position) {
