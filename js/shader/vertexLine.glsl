@@ -31,6 +31,7 @@ uniform float uBoundZ;
 uniform float uAmplitude;
 uniform float uTimeSpeed;
 uniform float uLoneHillHeight;
+uniform float uNewHillTime;
 uniform float uLoneHillSize;
 uniform float uBillowTime;
 
@@ -82,9 +83,9 @@ float mouseDistortion(float distortionSize, vec3 p) {
 float computeHeight(vec3 p) {
     float terrainDensity = 2.;
     vec3 terrainRandomSeed = vec3(-1., 0., 7.);
-    vec3 loneHillPosition = vec3(-0.5, 0., 4.3);
-    float hillEmergenceFactor = -0.03;
-    float loneHillHeight = uLoneHillHeight*(1. - smoothstep(0., uLoneHillSize, length(p - loneHillPosition)))*smoothstep(hillEmergenceFactor, 0., -uTimeSpeed);
+    vec3 loneHillPosition = vec3(-0.5 - uNewHillTime*uTimeSpeed, 0., 4.3);
+    float hillEmergenceFactor = smoothstep(-0.03, 0., -uTimeSpeed + sign(uNewHillTime));
+    float loneHillHeight = uLoneHillHeight*(1. - smoothstep(0., uLoneHillSize, length(p - loneHillPosition)))*hillEmergenceFactor;
 
     float noiz = noise(terrainDensity*(terrainRandomSeed + vec3(p.x + uTime*uTimeSpeed, 0., p.z)));
     return uAmplitude*noiz*noiz + loneHillHeight;

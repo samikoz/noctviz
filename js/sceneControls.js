@@ -117,6 +117,7 @@ export class FormFilledSetup extends BaseSceneSetup {
 
     updateControls(sketch) {
         super.updateControls(sketch);
+        sketch.uniforms.uNewHillTime.value += sketch.timedelta;
 
         let offsetTime = sketch.uniforms.uTime.value - this.initialTime;
         let zoomDuration = 15;

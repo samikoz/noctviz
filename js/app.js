@@ -55,6 +55,10 @@ export class Sketch {
         type: "f",
         value: 0.0
       },
+      uNewHillTime: {
+        type: "f",
+        value: 0.0
+      },
       uResolution: {
         type: "v2",
         value: new THREE.Vector2()
