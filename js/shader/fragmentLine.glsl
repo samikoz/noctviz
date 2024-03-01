@@ -56,8 +56,8 @@ void main() {
 
     //--Panchgani changes
     //vec4 c = vColor;
-    float phase = vPosition.z - uLineSpeed*uTime;
-    vec4 c = vec4(noctColors[(int(round(20.*vPosition.x)) + int(phase/PI)) % 6], 1);
+    float phase = vPosition.z + uLineSpeed*uTime;
+    vec4 c = vec4(noctColors[(int(round(100. + 20.*vPosition.x)) + int(phase/PI)) % 6], 1);
     //--
 
     if (useMap == 1.) c *= texture2D(map, vUV * repeat);

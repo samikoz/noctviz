@@ -189,6 +189,7 @@ document.onkeyup = function (e) {
   }
 }
 
+/*
 sketch.controls.addEventListener("change", event => {
   let target = sketch.controls.target;
   let position = sketch.controls.object.position;
@@ -197,3 +198,4 @@ sketch.controls.addEventListener("change", event => {
   console.log("camera position:", position.x, ",", position.y, ",", position.z);
   console.log("camera up direction:", up.x, ",", up.y, ",", up.z);
 });
+ */
