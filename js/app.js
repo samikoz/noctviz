@@ -3,7 +3,7 @@ import { MeshLineMaterial } from 'meshline'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 
 import SyntheticMountains from "./mountains";
-import {BaseSceneSetup, RightSideSceneSetup, ZoomingOutSetup} from "./sceneControls";
+import {BaseSceneSetup, FormFilledSetup, RightSideSceneSetup, ZoomingOutSetup} from "./sceneControls";
 
 export class Sketch {
   distortionSize= 0.2;
@@ -48,6 +48,10 @@ export class Sketch {
     this.isPlaying = true;
     this.uniforms = {
       uTime: {
+        type: "f",
+        value: 0.0
+      },
+      uBillowTime: {
         type: "f",
         value: 0.0
       },
@@ -142,8 +146,7 @@ export class Sketch {
 
   render() {
     if (!this.isPlaying) return;
-    this.uniforms.uTime.value += this.timedelta;
-    this.setup.updateControls(this.uniforms.uTime.value, this.camera, this.controls);
+    this.setup.updateControls(this);
 
     requestAnimationFrame(this.render.bind(this));
 
@@ -174,6 +177,10 @@ document.onkeyup = function (e) {
   }
   if (e.key === "m") {
     sketch.uniforms.uLoneHillHeight.value += 0.05;
+  }
+  if (e.key === "o") {
+    sketch.setup = new FormFilledSetup(sketch.uniforms);
+    sketch.setup.setControls(sketch.camera, sketch.controls);
   }
 }
 

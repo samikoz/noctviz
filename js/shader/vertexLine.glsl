@@ -32,6 +32,7 @@ uniform float uAmplitude;
 uniform float uTimeSpeed;
 uniform float uLoneHillHeight;
 uniform float uLoneHillSize;
+uniform float uBillowTime;
 
 varying vec2 vUV;
 varying vec4 vColor;
@@ -88,7 +89,7 @@ float computeHeight(vec3 p) {
 
 float computeBillowing(vec3 position) {
     float mouseContrib = 10.*mouseDistortion(uDistortionSize, position);
-    return 0.1*noise(vec3(position.x + uTime*0.1, 0., 10.*position.z + mouseContrib + uTime*(0.1+mouseContrib/50.)));
+    return 0.1*noise(vec3(position.x + uBillowTime*0.1, 0., 10.*position.z + mouseContrib + uTime*(0.1+mouseContrib/50.)));
 }
 
 float mouseHeightDrop(vec3 p) {
