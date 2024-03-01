@@ -50,11 +50,13 @@ export class ZoomingOutSetup extends BaseSceneSetup {
 }
 
 export class RightSideSceneSetup extends ZoomingOutSetup {
-    constructor(initialTime, amplitude) {
+    constructor(uniforms) {
         super();
-        this.initialTime = initialTime;
-        this.amplitude = amplitude;
-        this.initialAmplitudeValue = amplitude.value;
+        this.initialTime = uniforms.uTime.value;
+        this.timeSpeed = uniforms.uTimeSpeed;
+        this.initialTimeSpeed = uniforms.uTimeSpeed.value;
+        this.amplitude = uniforms.uAmplitude;
+        this.initialAmplitudeValue = uniforms.uAmplitude.value;
 
         this.cameraPosition.z = this.finalcameraZPosition;
         this.fboFragmentShader = fboFragment;
@@ -87,6 +89,7 @@ export class RightSideSceneSetup extends ZoomingOutSetup {
             controls.update();
 
             this.amplitude.value = this.initialAmplitudeValue * (1 - smoothTime) + 0.2 * smoothTime;
+            this.timeSpeed.value = this.initialTimeSpeed * (1 - smoothTime);
         }
     }
 }

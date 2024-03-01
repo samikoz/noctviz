@@ -9,6 +9,7 @@ export class Sketch {
   distortionSize= 0.2;
   amplitude = 0.65;
   lineSpeed = 0.5;
+  timeSpeed = 0.15;
 
   timedelta = 0.05;
 
@@ -69,6 +70,10 @@ export class Sketch {
       uLineSpeed: {
         type: "f",
         value: this.lineSpeed,
+      },
+      uTimeSpeed: {
+        type: "f",
+        value: this.timeSpeed,
       },
       uBoundX: {
         type: "f",
@@ -156,7 +161,7 @@ document.onmousemove = function(e) {
 
 document.onkeyup = function (e) {
   if (e.key === "n") {
-    sketch.setup = new RightSideSceneSetup(sketch.uniforms.uTime.value, sketch.uniforms.uAmplitude);
+    sketch.setup = new RightSideSceneSetup(sketch.uniforms);
     sketch.setup.setControls(sketch.camera, sketch.controls);
   }
   if (e.key === "m") {

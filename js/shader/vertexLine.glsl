@@ -29,6 +29,7 @@ uniform float uTime;
 uniform float uBoundX;
 uniform float uBoundZ;
 uniform float uAmplitude;
+uniform float uTimeSpeed;
 
 varying vec2 vUV;
 varying vec4 vColor;
@@ -76,7 +77,7 @@ float mouseDistortion(float distortionSize, vec3 p) {
 }
 
 float computeHeight(vec3 p) {
-    float noiz = noise(2.*vec3(p.x + uTime*0.15, 0., 7. + p.z));
+    float noiz = noise(2.*vec3(p.x + uTime*uTimeSpeed, 0., 7. + p.z));
     return uAmplitude*noiz*noiz;
 }
 
