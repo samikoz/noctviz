@@ -30,6 +30,8 @@ uniform float uBoundX;
 uniform float uBoundZ;
 uniform float uAmplitude;
 uniform float uTimeSpeed;
+uniform float uLoneHillHeight;
+uniform float uLoneHillSize;
 
 varying vec2 vUV;
 varying vec4 vColor;
@@ -77,12 +79,15 @@ float mouseDistortion(float distortionSize, vec3 p) {
 }
 
 float computeHeight(vec3 p) {
-    float noiz = noise(2.*vec3(p.x + uTime*uTimeSpeed, 0., 7. + p.z));
-    return uAmplitude*noiz*noiz;
+    vec3 loneHillPosition = vec3(-0.5, 0., 4.3);
+    float loneHillHeight = uLoneHillHeight*(1. - smoothstep(0., uLoneHillSize, length(p - loneHillPosition)))*smoothstep(-0.05, 0., -uTimeSpeed);
+
+    float noiz = noise(2.*vec3(-1. + p.x + uTime*uTimeSpeed, 0., 7. + p.z));
+    return uAmplitude*noiz*noiz + loneHillHeight;
 }
 
 float computeBillowing(vec3 position) {
-    float mouseContrib = 20.*mouseDistortion(uDistortionSize, position);
+    float mouseContrib = 10.*mouseDistortion(uDistortionSize, position);
     return 0.1*noise(vec3(position.x + uTime*0.1, 0., 10.*position.z + mouseContrib + uTime*(0.1+mouseContrib/50.)));
 }
 

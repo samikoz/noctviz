@@ -87,6 +87,14 @@ export class Sketch {
         type: "f",
         value: this.amplitude
       },
+      uLoneHillHeight: {
+        type: "f",
+        value: 0.2,
+      },
+      uLoneHillSize: {
+        type: "f",
+        value: 0.35
+      },
       uPositions: {
         value: null
       }
@@ -165,7 +173,7 @@ document.onkeyup = function (e) {
     sketch.setup.setControls(sketch.camera, sketch.controls);
   }
   if (e.key === "m") {
-    sketch.uniforms.uAmplitude.value += 0.1;
+    sketch.uniforms.uLoneHillHeight.value += 0.05;
   }
 }
 

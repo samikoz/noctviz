@@ -32,15 +32,16 @@ export class ZoomingOutSetup extends BaseSceneSetup {
     constructor() {
         super();
 
-        this.cameraPosition = new THREE.Vector3(-0.017708093695503725 , 0.10034586427452119 , -0.02882869418323792);
-        this.controlsTarget = new THREE.Vector3(-0.017708093695503732, 0.10034586427452119, 0);
+
+        this.cameraPosition = new THREE.Vector3(-0.01770809369550381 , 0.10034586427452115 , 0.6125304975561604);
+        this.controlsTarget = new THREE.Vector3(-0.01770809369550389 , 0.10034586427452111 , 1.2827183834787967);
         this.fboFragmentShader = fboFragment;
 
-        this.finalcameraZPosition = -4.614020485223368;
+        this.finalcameraZPosition = -6.386848693734031;
     }
 
     updateControls(time, camera, controls) {
-        let zoomDuration = 20;
+        let zoomDuration = 25;
         if (time < zoomDuration) {
             let smoothTime = THREE.MathUtils.smootherstep(time, 0, zoomDuration);
             let zPosition = this.cameraPosition.z * (1-smoothTime)  + this.finalcameraZPosition * smoothTime;
@@ -61,8 +62,8 @@ export class RightSideSceneSetup extends ZoomingOutSetup {
         this.cameraPosition.z = this.finalcameraZPosition;
         this.fboFragmentShader = fboFragment;
 
-        this.finalCameraPosition = new THREE.Vector3(4.055035858637772 , 0.7870165572245645 , -2.593413179527448);
-        this.finalControlsTarget = new THREE.Vector3(4.559365716747363 , 0.39398943965427885 , -2.4396169263903373);
+        this.finalCameraPosition = new THREE.Vector3(2.9907487284474836 , 0.4766877781622922 , -1.9034252255755764);
+        this.finalControlsTarget = new THREE.Vector3(4.282531081582864 , 0.1098231390699022 , -1.6012324578800312);
         this.finalUpPosition = new THREE.Vector3(0.12895533823797742 , 0.9688434461390165 , 0.31145424472778138);
 
     }
@@ -88,7 +89,7 @@ export class RightSideSceneSetup extends ZoomingOutSetup {
             controls.target.set(xTargetPosition, yTargetPosition, zTargetPosition);
             controls.update();
 
-            this.amplitude.value = this.initialAmplitudeValue * (1 - smoothTime) + 0.2 * smoothTime;
+            this.amplitude.value = this.initialAmplitudeValue * (1 - smoothTime);
             this.timeSpeed.value = this.initialTimeSpeed * (1 - smoothTime);
         }
     }
